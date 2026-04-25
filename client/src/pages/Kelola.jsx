@@ -31,7 +31,7 @@ export default function Kelola() {
     
     // Edit User State
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const [editData, setEditData] = useState({ id: '', name: '', email: '', whatsapp: '', role: 'user' });
+    const [editData, setEditData] = useState({ id: '', name: '', email: '', whatsapp: '', role: 'user', password: '' });
 
     // Blog SEO State
     const [activeTab, setActiveTab] = useState('users');
@@ -296,7 +296,8 @@ export default function Kelola() {
                                                                         name: user.name || '',
                                                                         email: user.email || '',
                                                                         whatsapp: user.whatsapp || '',
-                                                                        role: user.role || 'user'
+                                                                        role: user.role || 'user',
+                                                                        password: ''
                                                                     });
                                                                     setEditModalOpen(true);
                                                                 }}>
@@ -517,6 +518,22 @@ export default function Kelola() {
                             <div className="space-y-2">
                                 <Label>Email</Label>
                                 <Input value={editData.email} onChange={e => setEditData({ ...editData, email: e.target.value })} placeholder="email@example.com" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>New Password (Optional)</Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={editData.password}
+                                        onChange={e => setEditData({ ...editData, password: e.target.value })}
+                                        type="text"
+                                        placeholder="Leave blank to keep current"
+                                    />
+                                    <Button type="button" variant="outline" size="sm" onClick={() => {
+                                        const randomPass = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+                                        setEditData({ ...editData, password: randomPass });
+                                    }}>Generate</Button>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground">Minimal 8 characters if changing.</p>
                             </div>
                             <div className="space-y-2">
                                 <Label>Role</Label>

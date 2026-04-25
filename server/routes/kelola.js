@@ -285,10 +285,10 @@ router.put('/users/:id/tokens', validateInput(['amount']), async (req, res) => {
     }
 });
 
-// Update user details (Name, WhatsApp, Role)
+// Update user details (Name, WhatsApp, Role, Password)
 router.put('/users/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, whatsapp, role, email } = req.body;
+    const { name, whatsapp, role, email, password } = req.body;
 
     // Validasi ID format (UUID)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -296,7 +296,7 @@ router.put('/users/:id', async (req, res) => {
         return res.status(400).json({ error: 'Format ID pengguna tidak valid' });
     }
 
-    logAdminActivity(req, 'UPDATE_USER_DETAILS', { userId: id, name, whatsapp, role });
+    logAdminActivity(req, 'UPDATE_USER_DETAILS', { userId: id, name, whatsapp, role, hasPassword: !!password });
 
     try {
         const updateData = {};
@@ -304,6 +304,15 @@ router.put('/users/:id', async (req, res) => {
         if (whatsapp !== undefined) updateData.whatsapp = sanitizeInput(whatsapp);
         if (role !== undefined) updateData.role = sanitizeInput(role);
         if (email !== undefined) updateData.email = sanitizeInput(email)?.toLowerCase();
+        
+        // Handle password update
+        if (password && password.length > 0) {
+            if (password.length < 8) {
+                return res.status(400).json({ error: 'Password baru harus minimal 8 karakter' });
+            }
+            const hashedPassword = await bcrypt.hash(password, 12);
+            updateData.password_hash = hashedPassword;
+        }
 
         const { data, error } = await req.supabase
             .from('users')
