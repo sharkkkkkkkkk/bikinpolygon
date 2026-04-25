@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Users, Coins, PlusCircle, Search, Trash2, ArrowUpRight, ArrowDownLeft, FileText, Copy, Check } from 'lucide-react';
+import { Users, Coins, PlusCircle, Search, Trash2, ArrowUpRight, ArrowDownLeft, FileText, Copy, Check, Pencil, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AdminAEO from './AdminAEO';
 
@@ -28,6 +28,10 @@ export default function Kelola() {
     const [selectedUser, setSelectedUser] = useState(null);
     const [tokenAmount, setTokenAmount] = useState(0);
     const [tokenAction, setTokenAction] = useState('add');
+    
+    // Edit User State
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editData, setEditData] = useState({ id: '', name: '', email: '', whatsapp: '', role: 'user' });
 
     // Blog SEO State
     const [activeTab, setActiveTab] = useState('users');
@@ -71,6 +75,28 @@ export default function Kelola() {
             fetchUsers();
         } catch {
             toast({ title: "Error", description: "Failed to update tokens", variant: "destructive" });
+        }
+    };
+
+    const handleEditUser = async () => {
+        try {
+            await api.put(`/kelola/users/${editData.id}`, editData);
+            toast({ title: "Success", description: "User updated successfully" });
+            setEditModalOpen(false);
+            fetchUsers();
+        } catch (error) {
+            toast({ title: "Error", description: error.response?.data?.error || "Failed to update user", variant: "destructive" });
+        }
+    };
+
+    const handleDeleteUser = async (userId, email) => {
+        if (!confirm(`Are you sure you want to delete ${email}? This action cannot be undone.`)) return;
+        try {
+            await api.delete(`/kelola/users/${userId}`);
+            toast({ title: "Success", description: "User deleted successfully" });
+            fetchUsers();
+        } catch (error) {
+            toast({ title: "Error", description: error.response?.data?.error || "Failed to delete user", variant: "destructive" });
         }
     };
 
@@ -257,12 +283,29 @@ export default function Kelola() {
                                                             </div>
                                                         </td>
                                                         <td className="p-4 text-right">
-                                                            <Button variant="outline" size="sm" onClick={() => {
-                                                                setSelectedUser(user);
-                                                                setTokenModalOpen(true);
-                                                            }}>
-                                                                Manage Tokens
-                                                            </Button>
+                                                            <div className="flex justify-end gap-2">
+                                                                <Button variant="outline" size="sm" onClick={() => {
+                                                                    setSelectedUser(user);
+                                                                    setTokenModalOpen(true);
+                                                                }}>
+                                                                    <Coins className="h-4 w-4 mr-1" /> Tokens
+                                                                </Button>
+                                                                <Button variant="outline" size="sm" className="bg-slate-50" onClick={() => {
+                                                                    setEditData({
+                                                                        id: user.id,
+                                                                        name: user.name || '',
+                                                                        email: user.email || '',
+                                                                        whatsapp: user.whatsapp || '',
+                                                                        role: user.role || 'user'
+                                                                    });
+                                                                    setEditModalOpen(true);
+                                                                }}>
+                                                                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                                                                </Button>
+                                                                <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => handleDeleteUser(user.id, user.email)}>
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -451,6 +494,56 @@ export default function Kelola() {
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setTokenModalOpen(false)}>Cancel</Button>
                             <Button onClick={handleUpdateTokens}>Confirm Update</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Edit User Modal */}
+                <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit User Details</DialogTitle>
+                            <DialogDescription>Modify user account information and roles.</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label>Full Name</Label>
+                                <Input value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} placeholder="John Doe" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>WhatsApp Number</Label>
+                                <Input value={editData.whatsapp} onChange={e => setEditData({ ...editData, whatsapp: e.target.value })} placeholder="62812..." />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Email</Label>
+                                <Input value={editData.email} onChange={e => setEditData({ ...editData, email: e.target.value })} placeholder="email@example.com" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Role</Label>
+                                <div className="flex gap-4">
+                                    <Button
+                                        type="button"
+                                        variant={editData.role === 'user' ? 'default' : 'outline'}
+                                        className="flex-1"
+                                        onClick={() => setEditData({ ...editData, role: 'user' })}
+                                    >
+                                        <Users className="w-4 h-4 mr-2" /> User
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={editData.role === 'admin' ? 'default' : 'outline'}
+                                        className={cn("flex-1", editData.role === 'admin' && "bg-amber-600 hover:bg-amber-700")}
+                                        onClick={() => setEditData({ ...editData, role: 'admin' })}
+                                    >
+                                        <Shield className="w-4 h-4 mr-2" /> Admin
+                                    </Button>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-1">Caution: Changing role to Admin gives full panel access.</p>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+                            <Button onClick={handleEditUser}>Save Changes</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

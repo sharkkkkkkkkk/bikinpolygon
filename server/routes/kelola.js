@@ -285,6 +285,45 @@ router.put('/users/:id/tokens', validateInput(['amount']), async (req, res) => {
     }
 });
 
+// Update user details (Name, WhatsApp, Role)
+router.put('/users/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, whatsapp, role, email } = req.body;
+
+    // Validasi ID format (UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+        return res.status(400).json({ error: 'Format ID pengguna tidak valid' });
+    }
+
+    logAdminActivity(req, 'UPDATE_USER_DETAILS', { userId: id, name, whatsapp, role });
+
+    try {
+        const updateData = {};
+        if (name !== undefined) updateData.name = sanitizeInput(name);
+        if (whatsapp !== undefined) updateData.whatsapp = sanitizeInput(whatsapp);
+        if (role !== undefined) updateData.role = sanitizeInput(role);
+        if (email !== undefined) updateData.email = sanitizeInput(email)?.toLowerCase();
+
+        const { data, error } = await req.supabase
+            .from('users')
+            .update(updateData)
+            .eq('id', id)
+            .select('id, email, name, whatsapp, role, token_balance, created_at');
+
+        if (error) throw error;
+        if (!data || data.length === 0) {
+            return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+        }
+
+        logAdminActivity(req, 'UPDATE_USER_SUCCESS', { userId: id, updatedFields: Object.keys(updateData) });
+        res.json(data[0]);
+    } catch (err) {
+        logAdminActivity(req, 'UPDATE_USER_ERROR', { error: err.message });
+        res.status(500).json({ error: 'Gagal memperbarui data pengguna' });
+    }
+});
+
 // Delete user (dengan soft delete atau hard delete)
 router.delete('/users/:id', async (req, res) => {
     const { id } = req.params;
