@@ -1,0 +1,16 @@
+{
+    "name": "polygon-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "workspaces": [
+        "client",
+        "server"
+    ],
+    "devDependencies": {
+        "@supabase/supabase-js": "^2.91.0",
+        "dotenv": "^17.2.3"
+    }
+}
