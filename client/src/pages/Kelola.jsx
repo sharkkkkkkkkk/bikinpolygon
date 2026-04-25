@@ -535,28 +535,6 @@ export default function Kelola() {
                                 </div>
                                 <p className="text-[10px] text-muted-foreground">Minimal 8 characters if changing.</p>
                             </div>
-                            <div className="space-y-2">
-                                <Label>Role</Label>
-                                <div className="flex gap-4">
-                                    <Button
-                                        type="button"
-                                        variant={editData.role === 'user' ? 'default' : 'outline'}
-                                        className="flex-1"
-                                        onClick={() => setEditData({ ...editData, role: 'user' })}
-                                    >
-                                        <Users className="w-4 h-4 mr-2" /> User
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant={editData.role === 'admin' ? 'default' : 'outline'}
-                                        className={cn("flex-1", editData.role === 'admin' && "bg-amber-600 hover:bg-amber-700")}
-                                        onClick={() => setEditData({ ...editData, role: 'admin' })}
-                                    >
-                                        <Shield className="w-4 h-4 mr-2" /> Admin
-                                    </Button>
-                                </div>
-                                <p className="text-[10px] text-muted-foreground mt-1">Caution: Changing role to Admin gives full panel access.</p>
-                            </div>
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setEditModalOpen(false)}>Cancel</Button>

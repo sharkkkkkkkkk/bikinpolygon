@@ -302,7 +302,6 @@ router.put('/users/:id', async (req, res) => {
         const updateData = {};
         if (name !== undefined) updateData.name = sanitizeInput(name);
         if (whatsapp !== undefined) updateData.whatsapp = sanitizeInput(whatsapp);
-        if (role !== undefined) updateData.role = sanitizeInput(role);
         if (email !== undefined) updateData.email = sanitizeInput(email)?.toLowerCase();
         
         // Handle password update
