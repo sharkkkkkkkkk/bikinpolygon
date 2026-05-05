@@ -164,10 +164,22 @@ export default function PaymentPage() {
                                                     <p className="bg-[#F8FAFC] p-6 rounded-2xl border-4 border-black shadow-[inset_4px_4px_0px_rgba(0,0,0,0.05)]">
                                                         Gunakan aplikasi e-wallet atau mobile banking favorit Anda <span className="opacity-60">(GoPay, OVO, Dana, ShopeePay, BCA Mobile, dll)</span> untuk scan QRIS.
                                                     </p>
-                                                    <div className="bg-black text-white p-8 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(57,255,20,1)] relative overflow-hidden group">
-                                                        <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-[20deg] group-hover:left-[200%] transition-all duration-1000"></div>
-                                                        <div className="text-sm text-[#39FF14] font-mono mb-2 uppercase tracking-widest">Harga Paket:</div>
-                                                        <div className="text-4xl md:text-5xl font-black tracking-tighter">Rp 50.000 <span className="text-xl md:text-2xl font-normal opacity-80 block md:inline mt-2 md:mt-0">/ 15 Token</span></div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                                                        <div className="bg-[#39FF14] text-black p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform">
+                                                            <div className="text-xs font-black uppercase tracking-widest mb-1">Regular (Populer)</div>
+                                                            <div className="text-xl font-black">Rp 50.000</div>
+                                                            <div className="text-sm font-bold text-[#1D4ED8]">15 Token</div>
+                                                        </div>
+                                                        <div className="bg-white text-black p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform">
+                                                            <div className="text-xs font-black uppercase tracking-widest mb-1 text-slate-500">Pro</div>
+                                                            <div className="text-xl font-black">Rp 150.000</div>
+                                                            <div className="text-sm font-bold text-[#1D4ED8]">60 Token</div>
+                                                        </div>
+                                                        <div className="bg-black text-[#39FF14] p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform">
+                                                            <div className="text-xs font-black uppercase tracking-widest mb-1">Unlimited</div>
+                                                            <div className="text-xl font-black">Rp 300.000<span className="text-sm opacity-80">/bln</span></div>
+                                                            <div className="text-sm font-bold text-white">Untuk Biro Jasa</div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

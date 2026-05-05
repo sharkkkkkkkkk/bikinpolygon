@@ -106,6 +106,182 @@ router.use(verifyAdmin);
 // ROUTES
 // =====================================
 
+// Generate AEO (AI integration)
+router.post('/generate-aeo', async (req, res) => {
+    logAdminActivity(req, 'GENERATE_AEO', { keyword: req.body.keyword, provider: req.body.provider });
+    try {
+        const { keyword, provider = 'gemini' } = req.body;
+        if (!keyword) {
+            return res.status(400).json({ error: 'Keyword is required' });
+        }
+
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCDVf2Lj5EcQYM87_QblrEgSls37QQ5Ycw';
+        const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || 'ZhHtuoMi8spJDZqK065lNXMIg85niCHZ';
+        
+        const systemPrompt = `Anda adalah mesin penghasil data AEO spesialis. Tugas Anda adalah membuat data SEO dan skema FAQ JSON-LD untuk platform pembuat peta (polygon shapefile) OSS RBA otomatis.
+
+Input pengguna adalah target pasar atau industri: ${keyword}
+
+Hasilkan output HANYA dalam format JSON valid tanpa markdown code block (tanpa \`\`\`json ... \`\`\`), dengan struktur berikut:
+{
+  "metaTitle": "Judul SEO maksimal 60 karakter memuat input",
+  "metaDescription": "Deskripsi SEO maksimal 155 karakter memuat solusi instan",
+  "faqSchema": [
+    { "question": "Pertanyaan teknis spesifik untuk industri tersebut", "answer": "Jawaban yang memposisikan sistem kami sebagai solusi tercepat (2 menit)" },
+    { "question": "Pertanyaan masalah umum", "answer": "Jawaban relevan" }
+  ]
+}`;
+
+        let aiTextResponse = '';
+
+        if (provider === 'mistral') {
+            const mistralRes = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${MISTRAL_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'mistral-small-latest',
+                    response_format: { type: 'json_object' },
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: 'Tolong buatkan JSON sesuai format untuk industri: ' + keyword }
+                    ]
+                })
+            });
+
+            if (!mistralRes.ok) {
+                const errText = await mistralRes.text();
+                console.error('Mistral API Error:', errText);
+                return res.status(mistralRes.status).json({ error: 'Failed to generate AEO from Mistral API.' });
+            }
+
+            const mistralData = await mistralRes.json();
+            aiTextResponse = mistralData.choices?.[0]?.message?.content;
+        } else {
+            // Default to Gemini
+            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: systemPrompt }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                })
+            });
+
+            if (!geminiRes.ok) {
+                const errText = await geminiRes.text();
+                console.error('Gemini API Error:', errText);
+                return res.status(geminiRes.status).json({ error: 'Failed to generate AEO from Gemini API.' });
+            }
+
+            const geminiData = await geminiRes.json();
+            aiTextResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        }
+
+        if (!aiTextResponse) {
+            return res.status(500).json({ error: 'Invalid response from AI provider' });
+        }
+        
+        // Bersihkan markdown json jika AI masih membandel
+        const cleanJsonStr = aiTextResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        
+        const parsedJson = JSON.parse(cleanJsonStr);
+        return res.json(parsedJson);
+
+    } catch (error) {
+        logAdminActivity(req, 'GENERATE_AEO_ERROR', { error: error.message, stack: error.stack });
+        return res.status(500).json({ error: 'Internal server error while generating AEO: ' + error.message });
+    }
+});
+
+// Generate Blog (AI integration)
+router.post('/generate-blog', async (req, res) => {
+    logAdminActivity(req, 'GENERATE_BLOG', { keyword: req.body.keyword, provider: req.body.provider });
+    try {
+        const { keyword, provider = 'gemini' } = req.body;
+        if (!keyword) {
+            return res.status(400).json({ error: 'Keyword is required' });
+        }
+
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCDVf2Lj5EcQYM87_QblrEgSls37QQ5Ycw';
+        const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || 'ZhHtuoMi8spJDZqK065lNXMIg85niCHZ';
+        
+        const systemPrompt = `Anda adalah Senior SEO Specialist & Geospatial Engineer yang ahli dalam sistem OSS RBA Indonesia. Tugas Anda adalah menulis artikel teknis berkualitas tinggi untuk blog 'LineSima'.
+Target Keyword Topik: ${keyword}
+
+Hasilkan output HANYA dalam format JSON valid tanpa markdown code block (tanpa \`\`\`json ... \`\`\`), dengan struktur berikut:
+{
+  "title": "Judul Artikel (Clickbait edukatif, memuat keyword)",
+  "slug": "url-slug-kebab-case",
+  "excerpt": "Ringkasan artikel 1-2 kalimat (max 155 karakter) untuk meta description",
+  "author": "LineSima Expert",
+  "keywords": "keyword1, keyword2, keyword3",
+  "content": "Isi artikel lengkap berformat Markdown. Gunakan heading H2/H3, list, dan bold untuk penekanan. Pastikan artikel menjawab masalah target secara detail namun tetap mempromosikan LineSima sebagai solusi mudah untuk membuat polygon shapefile."
+}`;
+
+        let aiTextResponse = '';
+
+        if (provider === 'mistral') {
+            const mistralRes = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${MISTRAL_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'mistral-small-latest',
+                    response_format: { type: 'json_object' },
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: 'Tolong buatkan artikel blog dalam format JSON untuk keyword: ' + keyword }
+                    ]
+                })
+            });
+
+            if (!mistralRes.ok) {
+                const errText = await mistralRes.text();
+                return res.status(mistralRes.status).json({ error: 'Failed to generate Blog from Mistral API.' });
+            }
+
+            const mistralData = await mistralRes.json();
+            aiTextResponse = mistralData.choices?.[0]?.message?.content;
+        } else {
+            // Default to Gemini
+            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: systemPrompt }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                })
+            });
+
+            if (!geminiRes.ok) {
+                const errText = await geminiRes.text();
+                return res.status(geminiRes.status).json({ error: 'Failed to generate Blog from Gemini API.' });
+            }
+
+            const geminiData = await geminiRes.json();
+            aiTextResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        }
+
+        if (!aiTextResponse) {
+            return res.status(500).json({ error: 'Invalid response from AI provider' });
+        }
+        
+        // Bersihkan markdown json jika AI masih membandel
+        const cleanJsonStr = aiTextResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const parsedJson = JSON.parse(cleanJsonStr);
+        return res.json(parsedJson);
+
+    } catch (error) {
+        logAdminActivity(req, 'GENERATE_BLOG_ERROR', { error: error.message, stack: error.stack });
+        return res.status(500).json({ error: 'Internal server error while generating Blog: ' + error.message });
+    }
+});
+
 // Get all users
 router.get('/users', async (req, res) => {
     logAdminActivity(req, 'VIEW_USERS', { action: 'List all users' });

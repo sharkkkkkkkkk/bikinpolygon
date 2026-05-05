@@ -55,14 +55,24 @@ export default function Footer() {
                     <div>
                         <h3 className="font-black text-xl mb-6 text-[#39FF14] uppercase border-b-2 border-[#39FF14]/30 pb-2 inline-block">Company</h3>
                         <ul className="space-y-4 font-bold text-lg">
-                            {['About Us', 'Contact', 'Privacy Policy'].map((item) => (
-                                <li key={item}>
-                                    <a href="#" className="flex items-center group">
-                                        <span className="w-0 overflow-hidden group-hover:w-6 transition-all duration-300 text-[#39FF14]">&gt;&gt;</span>
-                                        <span className="group-hover:text-[#39FF14] group-hover:translate-x-2 transition-all duration-300">{item}</span>
-                                    </a>
-                                </li>
-                            ))}
+                            <li>
+                                <a href="/about" className="flex items-center group">
+                                    <span className="w-0 overflow-hidden group-hover:w-6 transition-all duration-300 text-[#39FF14]">&gt;&gt;</span>
+                                    <span className="group-hover:text-[#39FF14] group-hover:translate-x-2 transition-all duration-300">About Us</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/privacy" className="flex items-center group">
+                                    <span className="w-0 overflow-hidden group-hover:w-6 transition-all duration-300 text-[#39FF14]">&gt;&gt;</span>
+                                    <span className="group-hover:text-[#39FF14] group-hover:translate-x-2 transition-all duration-300">Privacy Policy</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/terms" className="flex items-center group">
+                                    <span className="w-0 overflow-hidden group-hover:w-6 transition-all duration-300 text-[#39FF14]">&gt;&gt;</span>
+                                    <span className="group-hover:text-[#39FF14] group-hover:translate-x-2 transition-all duration-300">Terms of Service</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
@@ -71,14 +81,14 @@ export default function Footer() {
                         <h3 className="font-black text-xl mb-6 text-[#39FF14] uppercase border-b-2 border-[#39FF14]/30 pb-2 inline-block">Ecosystem</h3>
                         <ul className="space-y-4 font-bold text-lg">
                             <li>
-                                <a href="https://main-webapp.com" className="flex items-center gap-2 group hover:text-[#39FF14] transition-colors bg-white/5 p-3 rounded-xl border border-white/10 hover:border-[#39FF14]">
+                                <a href="/" className="flex items-center gap-2 group hover:text-[#39FF14] transition-colors bg-white/5 p-3 rounded-xl border border-white/10 hover:border-[#39FF14]">
                                     <span className="flex-1">Main WebApp</span>
                                     <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                                 </a>
                             </li>
                             <li>
-                                <a href="#" className="flex items-center gap-2 group hover:text-[#39FF14] transition-colors bg-white/5 p-3 rounded-xl border border-white/10 hover:border-[#39FF14]">
-                                    <span className="flex-1">Documentation</span>
+                                <a href="/api-docs" className="flex items-center gap-2 group hover:text-[#39FF14] transition-colors bg-white/5 p-3 rounded-xl border border-white/10 hover:border-[#39FF14]">
+                                    <span className="flex-1">API Documentation</span>
                                     <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                                 </a>
                             </li>

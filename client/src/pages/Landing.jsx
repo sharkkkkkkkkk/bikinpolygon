@@ -224,12 +224,30 @@ export default function Landing() {
                     </div>
 
                     <div className="hidden md:flex gap-4 items-center">
-                        <div className="bg-white text-black font-mono font-bold px-4 py-1 rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-xs mr-4 hover:shadow-none hover:translate-y-[2px] transition-all cursor-default">
-                            // Sistem Geospasial
-                        </div>
-                        <a href="/payment" className="font-bold border-2 border-transparent hover:border-[#39FF14] px-4 py-2 rounded-xl transition-all">
-                            Cara Pembayaran
+                        <a href="/" className="font-bold border-2 border-transparent hover:border-[#39FF14] px-4 py-2 rounded-xl transition-all">
+                            Beranda
                         </a>
+                        <div className="relative group">
+                            <button className="font-bold border-2 border-transparent hover:border-[#39FF14] px-4 py-2 rounded-xl transition-all flex items-center gap-1">
+                                Solusi Industri <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div className="absolute left-0 mt-2 w-56 bg-white text-black border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50">
+                                <a href="#" className="px-4 py-3 font-bold hover:bg-[#39FF14] border-b-2 border-black">UMKM</a>
+                                <a href="#" className="px-4 py-3 font-bold hover:bg-[#39FF14] border-b-2 border-black">Restoran</a>
+                                <a href="#" className="px-4 py-3 font-bold hover:bg-[#39FF14] border-b-2 border-black">Gudang</a>
+                                <a href="#" className="px-4 py-3 font-bold hover:bg-[#39FF14]">Konsultan Perizinan</a>
+                            </div>
+                        </div>
+                        <div className="relative group">
+                            <button className="font-bold border-2 border-transparent hover:border-[#39FF14] px-4 py-2 rounded-xl transition-all flex items-center gap-1">
+                                Harga <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div className="absolute left-0 mt-2 w-48 bg-white text-black border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50">
+                                <a href="/payment" className="px-4 py-3 font-bold hover:bg-[#39FF14] border-b-2 border-black">Regular</a>
+                                <a href="/payment" className="px-4 py-3 font-bold hover:bg-[#39FF14] border-b-2 border-black">Pro</a>
+                                <a href="/payment" className="px-4 py-3 font-bold hover:bg-[#39FF14]">Unlimited</a>
+                            </div>
+                        </div>
                         {user ? (
                             <Button asChild className="bg-[#39FF14] hover:bg-[#32e612] text-black font-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] rounded-xl uppercase h-12 px-6 transition-all">
                                 <a href="/dashboard">Dashboard</a>
@@ -249,6 +267,22 @@ export default function Landing() {
                         {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </button>
                 </div>
+                {/* Mobile Menu Dropdown */}
+                {isMenuOpen && (
+                    <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b-4 border-black p-6 shadow-[0px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4 text-black">
+                        <a href="/" className="font-bold text-lg border-b-2 border-black pb-2 hover:text-[#39FF14] transition-colors">Beranda</a>
+                        <div className="font-bold text-lg border-b-2 border-black pb-2 text-slate-500">Solusi Industri</div>
+                        <a href="/payment" className="font-bold text-lg border-b-2 border-black pb-2 hover:text-[#39FF14] transition-colors">Harga / Cara Pembayaran</a>
+                        {user ? (
+                            <a href="/dashboard" className="bg-[#39FF14] text-black font-black border-2 border-black p-4 text-center uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mt-2">Dashboard</a>
+                        ) : (
+                            <div className="flex flex-col gap-3 mt-2">
+                                <button onClick={() => { setIsMenuOpen(false); document.getElementById('auth-card')?.scrollIntoView({ behavior: 'smooth' })}} className="font-bold border-2 border-black p-4 text-center uppercase">Masuk</button>
+                                <button onClick={() => { setIsMenuOpen(false); document.getElementById('auth-card')?.scrollIntoView({ behavior: 'smooth' })}} className="bg-[#39FF14] hover:bg-[#32e612] text-black font-black border-2 border-black p-4 text-center uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Mulai Sekarang</button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </nav>
 
             {/* HERO SECTION */}
@@ -287,7 +321,7 @@ export default function Landing() {
                         
                         <Reveal delay={200}>
                             <p className="text-xl md:text-2xl font-semibold bg-black/20 p-6 rounded-2xl border-l-4 border-[#39FF14] max-w-2xl leading-relaxed hover:bg-black/30 transition-colors">
-                                Gagal upload peta di OSS? Buat file Polygon (.shp) presisi tinggi untuk perizinan usaha (NIB) secara instan.
+                                Hemat berjam-jam waktu Anda dibanding belajar QGIS atau menunggu Biro Jasa. Buat file Polygon (.shp) presisi tinggi untuk NIB OSS dalam hitungan menit.
                             </p>
                         </Reveal>
                         
@@ -482,20 +516,35 @@ export default function Landing() {
                                     </Button>
                                 </div>
 
-                                <TiltCard className="bg-white/10 p-8 rounded-3xl border-2 border-white/20 backdrop-blur-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,0.5)]">
-                                    <div className="flex items-center gap-6 mb-4">
-                                        <div className="p-4 bg-[#1D4ED8] rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-bounce">
-                                            <Coins className="w-10 h-10 text-white" />
+                                <div className="space-y-6">
+                                    <TiltCard className="bg-white/10 p-8 rounded-3xl border-2 border-white/20 backdrop-blur-sm shadow-[8px_8px_0px_0px_rgba(0,0,0,0.5)]">
+                                        <div className="flex items-center gap-6 mb-4">
+                                            <div className="p-4 bg-[#1D4ED8] rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-bounce">
+                                                <Coins className="w-10 h-10 text-white" />
+                                            </div>
+                                            <div>
+                                                <div className="font-mono text-[#39FF14] font-bold text-sm uppercase">Self-Service</div>
+                                                <div className="text-4xl font-black">5 Token</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="font-mono text-[#39FF14] font-bold text-sm uppercase">Biaya per Generate</div>
-                                            <div className="text-4xl font-black">5 Token</div>
-                                        </div>
-                                    </div>
-                                    <p className="font-bold opacity-80 text-lg">
-                                        Dapatkan hasil shapefile presisi tinggi hanya dengan 5 token per kali generate.
-                                    </p>
-                                </TiltCard>
+                                        <p className="font-bold opacity-80 text-lg">
+                                            Dapatkan hasil shapefile presisi tinggi hanya dengan 5 token per kali generate.
+                                        </p>
+                                    </TiltCard>
+
+                                    <TiltCard className="bg-amber-500 p-8 rounded-3xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] group cursor-pointer hover:-translate-y-1 transition-transform">
+                                        <div className="font-mono text-black font-black text-sm uppercase tracking-widest mb-2 border-b-2 border-black/20 pb-2 inline-block">LAYANAN DONE-FOR-YOU</div>
+                                        <div className="text-3xl md:text-4xl font-black text-black leading-none mb-3">Rp 150.000<span className="text-lg opacity-80">/polygon</span></div>
+                                        <p className="font-bold text-black/80 text-lg mb-6 leading-tight">
+                                            Bingung atau gagal self-service? Kami buatkan file SHP siap upload untuk Anda. 100% dijamin lolos OSS RBA.
+                                        </p>
+                                        <Button size="lg" className="w-full bg-black hover:bg-slate-900 text-amber-500 font-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] uppercase tracking-wide" asChild>
+                                            <a href="https://wa.me/6288983840979?text=Halo%20Admin,%20saya%20ingin%20menggunakan%20jasa%20pembuatan%20polygon%20Done-For-You." target="_blank" rel="noreferrer">
+                                                [ Pesan Jasa Sekarang ]
+                                            </a>
+                                        </Button>
+                                    </TiltCard>
+                                </div>
                             </div>
                         </div>
                     </Reveal>

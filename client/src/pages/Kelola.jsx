@@ -8,9 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Users, Coins, PlusCircle, Search, Trash2, ArrowUpRight, ArrowDownLeft, FileText, Copy, Check, Pencil, Shield } from 'lucide-react';
+import { Users, Coins, PlusCircle, Search, Trash2, ArrowUpRight, ArrowDownLeft, FileText, Copy, Check, Pencil, Shield, PenTool } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import AdminAEO from './AdminAEO';
+import AeoManager from './AeoManager';
 
 export default function Kelola() {
     const { logout } = useAuth();
@@ -36,10 +36,36 @@ export default function Kelola() {
     // Blog SEO State
     const [activeTab, setActiveTab] = useState('users');
     const [blogData, setBlogData] = useState({ title: '', slug: '', excerpt: '', author: 'Admin', keywords: '', content: '' });
+    const [articles, setArticles] = useState([]);
+    const [blogQueue, setBlogQueue] = useState([]);
+    const [blogKeywordInput, setBlogKeywordInput] = useState('');
+    const [isGeneratingBlog, setIsGeneratingBlog] = useState(false);
+    const [provider, setProvider] = useState('gemini');
 
     useEffect(() => {
         fetchUsers();
+        fetchArticles();
+        loadBlogQueue();
     }, []);
+
+    const fetchArticles = async () => {
+        try {
+            const { data, error } = await supabase.from('articles').select('id, title, slug, created_at').order('created_at', { ascending: false }).limit(10);
+            if (!error && data) setArticles(data);
+        } catch (err) {
+            console.error("Error fetching articles:", err);
+        }
+    };
+
+    const loadBlogQueue = async () => {
+        try {
+            const { db } = await import('@/db');
+            const queue = await db.blog_keyword_queue.toArray();
+            setBlogQueue(queue);
+        } catch (err) {
+            console.error("Dexie DB not ready", err);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -105,6 +131,68 @@ export default function Kelola() {
         (u.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (u.whatsapp || '').includes(searchTerm)
     );
+
+    // Blog AI Functions
+    const handleAddBlogQueue = async (e) => {
+        e.preventDefault();
+        if (!blogKeywordInput.trim()) return;
+        try {
+            const { db } = await import('@/db');
+            await db.blog_keyword_queue.add({ keyword: blogKeywordInput.trim(), status: 'pending' });
+            setBlogKeywordInput('');
+            toast({ title: "Success", description: "Keyword added to queue" });
+            loadBlogQueue();
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to add to queue", variant: "destructive" });
+        }
+    };
+
+    const handleDeleteBlogQueue = async (id) => {
+        try {
+            const { db } = await import('@/db');
+            await db.blog_keyword_queue.delete(id);
+            loadBlogQueue();
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to delete queue item", variant: "destructive" });
+        }
+    };
+
+    const handleGenerateBlog = async () => {
+        if (blogQueue.length === 0) {
+            toast({ title: "Info", description: "Queue is empty. Add keywords first." });
+            return;
+        }
+        
+        setIsGeneratingBlog(true);
+        const target = blogQueue[0];
+        
+        try {
+            const res = await api.post('/kelola/generate-blog', { keyword: target.keyword, provider });
+            const data = res.data;
+            
+            // Auto-fill the existing schema/form!
+            setBlogData({
+                title: data.title || '',
+                slug: data.slug || '',
+                excerpt: data.excerpt || '',
+                author: data.author || 'LineSima Expert',
+                keywords: data.keywords || '',
+                content: data.content || ''
+            });
+
+            // Remove from queue
+            const { db } = await import('@/db');
+            await db.blog_keyword_queue.delete(target.id);
+            loadBlogQueue();
+            
+            toast({ title: "AI Generation Success!", description: `Draft ready for: ${target.keyword}` });
+        } catch (error) {
+            const errMsg = error.response?.data?.error || error.message || 'Gagal menghubungi AI Server';
+            toast({ title: "AI Error", description: errMsg, variant: "destructive" });
+        } finally {
+            setIsGeneratingBlog(false);
+        }
+    };
 
     // Analytics
     const totalUsers = users.length;
@@ -320,75 +408,130 @@ export default function Kelola() {
                 ) : activeTab === 'seo' ? (
                     /* Blog SEO Tool Section */
                     <div className="grid lg:grid-cols-2 gap-8">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Create New Blog Post</CardTitle>
-                                <CardDescription>Fill in the details to generate SEO-optimized article data.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label>Article Title</Label>
-                                    <Input
-                                        placeholder="e.g. Cara Mengurus NIB OSS"
-                                        value={blogData.title}
-                                        onChange={e => {
-                                            const title = e.target.value;
-                                            setBlogData({
-                                                ...blogData,
-                                                title,
-                                                // Auto-generate slug
-                                                slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
-                                            });
-                                        }}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Slug (URL Friendly)</Label>
-                                        <Input value={blogData.slug} onChange={e => setBlogData({ ...blogData, slug: e.target.value })} />
+                        <div className="space-y-6">
+                            {/* AI Blog Generator Card */}
+                            <Card className="border-amber-200 bg-amber-50">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-amber-900">
+                                        <PenTool className="w-5 h-5 text-amber-600" /> AI Blog Generator
+                                    </CardTitle>
+                                    <CardDescription className="text-amber-700/80">
+                                        Queue keywords and auto-generate full Markdown articles directly into the form.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex gap-2 items-center">
+                                        <select 
+                                            value={provider}
+                                            onChange={(e) => setProvider(e.target.value)}
+                                            className="p-2 text-sm bg-white border border-amber-200 rounded-md focus:ring-amber-500"
+                                        >
+                                            <option value="gemini">Google Gemini</option>
+                                            <option value="mistral">Mistral AI</option>
+                                        </select>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label>Author</Label>
-                                        <Input value={blogData.author} onChange={e => setBlogData({ ...blogData, author: e.target.value })} />
+                                    <form onSubmit={handleAddBlogQueue} className="flex gap-2">
+                                        <Input
+                                            placeholder="Enter target keyword (e.g., Solusi Error WGS84)"
+                                            value={blogKeywordInput}
+                                            onChange={e => setBlogKeywordInput(e.target.value)}
+                                            className="bg-white border-amber-200"
+                                        />
+                                        <Button type="submit" variant="secondary" className="bg-amber-100 hover:bg-amber-200 text-amber-900">Queue</Button>
+                                    </form>
+                                    
+                                    <div className="flex flex-col gap-2 max-h-32 overflow-y-auto bg-white rounded-md border border-amber-200 p-2">
+                                        {blogQueue.length === 0 ? (
+                                            <span className="text-xs text-amber-600/50 italic text-center py-2">Queue is empty</span>
+                                        ) : (
+                                            blogQueue.map((item, i) => (
+                                                <div key={item.id} className="flex justify-between items-center text-xs p-1">
+                                                    <span className="flex gap-2"><strong className="text-amber-800">{i+1}.</strong> {item.keyword}</span>
+                                                    <button onClick={() => handleDeleteBlogQueue(item.id)} className="text-red-400 hover:text-red-600">
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Meta Keywords (Comma separated)</Label>
-                                    <Input
-                                        placeholder="nib, oss, peta digital, shapefile"
-                                        value={blogData.keywords}
-                                        onChange={e => setBlogData({ ...blogData, keywords: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Excerpt (Meta Description)</Label>
-                                    <textarea
-                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        placeholder="Brief summary for Google connection..."
-                                        value={blogData.excerpt}
-                                        onChange={e => setBlogData({ ...blogData, excerpt: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Content (Markdown)</Label>
-                                    <textarea
-                                        className="flex min-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
-                                        placeholder="## Heading 2&#10;Write your content using Markdown..."
-                                        value={blogData.content}
-                                        onChange={e => setBlogData({ ...blogData, content: e.target.value })}
-                                    />
-                                </div>
-                                <Button className="w-full" onClick={async () => {
-                                    if (!blogData.title || !blogData.content) {
-                                        toast({ title: "Error", description: "Title and Content are required", variant: "destructive" });
-                                        return;
-                                    }
 
-                                    try {
-                                        const { data: _data, error: insertError } = await supabase
-                                            .from('articles')
-                                            .insert([
-                                                {
+                                    <Button 
+                                        onClick={handleGenerateBlog} 
+                                        disabled={isGeneratingBlog || blogQueue.length === 0}
+                                        className="w-full font-bold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-md"
+                                    >
+                                        {isGeneratingBlog ? "AI IS WRITING..." : "WRITE NEXT POST VIA AI"}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Create New Blog Post</CardTitle>
+                                    <CardDescription>Fill in the details or use AI above to auto-fill.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label>Article Title</Label>
+                                        <Input
+                                            placeholder="e.g. Cara Mengurus NIB OSS"
+                                            value={blogData.title}
+                                            onChange={e => {
+                                                const title = e.target.value;
+                                                setBlogData({
+                                                    ...blogData,
+                                                    title,
+                                                    slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label>Slug (URL Friendly)</Label>
+                                            <Input value={blogData.slug} onChange={e => setBlogData({ ...blogData, slug: e.target.value })} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Author</Label>
+                                            <Input value={blogData.author} onChange={e => setBlogData({ ...blogData, author: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Meta Keywords</Label>
+                                        <Input
+                                            placeholder="nib, oss, peta digital, shapefile"
+                                            value={blogData.keywords}
+                                            onChange={e => setBlogData({ ...blogData, keywords: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Excerpt (Meta Description)</Label>
+                                        <textarea
+                                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            placeholder="Brief summary for Google connection..."
+                                            value={blogData.excerpt}
+                                            onChange={e => setBlogData({ ...blogData, excerpt: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Content (Markdown)</Label>
+                                        <textarea
+                                            className="flex min-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+                                            placeholder="## Heading 2&#10;Write your content using Markdown..."
+                                            value={blogData.content}
+                                            onChange={e => setBlogData({ ...blogData, content: e.target.value })}
+                                        />
+                                    </div>
+                                    <Button className="w-full bg-slate-900 text-white hover:bg-slate-800" onClick={async () => {
+                                        if (!blogData.title || !blogData.content) {
+                                            toast({ title: "Error", description: "Title and Content are required", variant: "destructive" });
+                                            return;
+                                        }
+
+                                        try {
+                                            const { data: _data, error: insertError } = await supabase
+                                                .from('articles')
+                                                .insert([{
                                                     slug: blogData.slug,
                                                     title: blogData.title,
                                                     excerpt: blogData.excerpt,
@@ -396,44 +539,58 @@ export default function Kelola() {
                                                     keywords: blogData.keywords,
                                                     content: blogData.content,
                                                     is_published: true
-                                                }
-                                            ])
-                                            .select();
+                                                }])
+                                                .select();
 
-                                        if (insertError) throw insertError;
+                                            if (insertError) throw insertError;
 
-                                        toast({ title: "Success!", description: "Article published to database." });
-                                        // Reset form
-                                        setBlogData({ title: '', slug: '', excerpt: '', author: 'Admin', keywords: '', content: '' });
-                                    } catch (err) {
-                                        console.error(err);
-                                        toast({ title: "Error", description: err.message || "Failed to save article", variant: "destructive" });
-                                    }
-                                }}>
-                                    <Check className="w-4 h-4 mr-2" /> Publish Article
-                                </Button>
-                            </CardContent>
-                        </Card>
+                                            toast({ title: "Success!", description: "Article published to database." });
+                                            setBlogData({ title: '', slug: '', excerpt: '', author: 'Admin', keywords: '', content: '' });
+                                            fetchArticles(); // Refresh list!
+                                        } catch (err) {
+                                            console.error(err);
+                                            toast({ title: "Error", description: err.message || "Failed to save article", variant: "destructive" });
+                                        }
+                                    }}>
+                                        <Check className="w-4 h-4 mr-2" /> Publish to Live Database
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        </div>
 
                         <Card className="h-full flex flex-col">
                             <CardHeader>
-                                <CardTitle>Recent Articles (Database)</CardTitle>
+                                <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5"/> Recent Articles (Live DB)</CardTitle>
                                 <CardDescription>
                                     List of articles currently live on Supabase.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-1 overflow-auto">
-                                <div className="text-sm text-muted-foreground p-4 text-center border rounded-lg border-dashed">
-                                    Refresh page to see latest articles list here...
-                                    <br />
-                                    (Connect your Supabase credentials in .env first)
-                                </div>
+                                {articles.length === 0 ? (
+                                    <div className="text-sm text-muted-foreground p-4 text-center border rounded-lg border-dashed">
+                                        No articles found. Generate one to see it here.
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-3">
+                                        {articles.map(article => (
+                                            <div key={article.id} className="p-3 border rounded-lg bg-slate-50 flex justify-between items-center group hover:border-slate-300">
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-sm line-clamp-1">{article.title}</span>
+                                                    <span className="text-xs text-slate-500">/{article.slug}</span>
+                                                </div>
+                                                <a href={`/blog/${article.slug}`} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
+                                                    <ArrowUpRight className="w-4 h-4" />
+                                                </a>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
                 ) : (
                     <div className="bg-white rounded-2xl shadow-sm border p-4">
-                        <AdminAEO />
+                        <AeoManager />
                     </div>
                 )}
 

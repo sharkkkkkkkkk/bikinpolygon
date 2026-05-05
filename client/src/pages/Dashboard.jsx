@@ -139,9 +139,17 @@ export default function Dashboard() {
         <div className="h-screen w-full bg-slate-50 flex flex-col overflow-hidden">
             {/* Header - Fixed Top (z-30) */}
             <header className="z-30 bg-white border-b shadow-sm h-16 flex-none px-6 flex justify-between items-center relative">
-                <div className="font-bold text-xl flex items-center gap-2 text-slate-800">
-                    <div className="w-8 h-8 rounded bg-amber-500 flex items-center justify-center text-white text-xs font-bold">PS</div>
-                    PolygonSima
+                <div className="font-bold text-xl flex items-center gap-6 text-slate-800">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded bg-amber-500 flex items-center justify-center text-white text-xs font-bold">LS</div>
+                        LineSima
+                    </div>
+                    
+                    {/* Post-Login Navigation */}
+                    <nav className="hidden md:flex items-center gap-4 text-sm font-semibold">
+                        <a href="/dashboard" className="text-slate-900 border-b-2 border-amber-500 pb-1">Buat Peta Polygon</a>
+                        <a href="#" className="text-slate-500 hover:text-slate-900 pb-1 border-b-2 border-transparent">Riwayat Polygon</a>
+                    </nav>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="hidden sm:flex text-sm font-medium bg-secondary px-3 py-1.5 rounded-full items-center gap-2">
@@ -149,8 +157,8 @@ export default function Dashboard() {
                         <span className="text-amber-600 font-bold">{user?.token_balance}</span>
                     </div>
                     <PaymentModal>
-                        <Button size="sm" variant="outline" className="border-amber-200 text-amber-600 hover:bg-amber-50 rounded-full px-4">
-                            + Tokens
+                        <Button size="sm" variant="outline" className="border-amber-200 text-amber-600 hover:bg-amber-50 rounded-full px-4 font-bold">
+                            Top-up Token
                         </Button>
                     </PaymentModal>
                     <Button variant="ghost" size="sm" onClick={logout} className="text-slate-500 hover:text-red-500">
@@ -187,7 +195,13 @@ export default function Dashboard() {
                         <CardContent className="p-5 space-y-5 overflow-y-auto flex-1">
                             {/* Info Box */}
                             <div className="p-3 bg-blue-50 text-blue-800 rounded-lg text-xs leading-relaxed border border-blue-100">
-                                <strong>Panduan:</strong> Cari lokasi atau paste Link Google Maps. Gambar polygon di peta, lalu download SHP.
+                                <strong>Panduan Sistem:</strong>
+                                <ul className="list-decimal pl-4 mt-1 space-y-0.5">
+                                    <li>Cari lokasi lahan Anda melalui kotak pencarian.</li>
+                                    <li>Gunakan ikon ⬡ (draw polygon) di kiri peta untuk mulai menggambar batas lahan.</li>
+                                    <li>Klik titik awal kembali untuk menutup bidang polygon.</li>
+                                    <li>Klik tombol <strong>"Dapatkan File OSS"</strong>.</li>
+                                </ul>
                             </div>
 
                             {/* Search */}
@@ -263,11 +277,33 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Server Generate Button */}
-                            <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white shadow-lg mt-2" size="lg" onClick={handleGenerate} disabled={loading}>
-                                <Download className="w-4 h-4 mr-2" />
-                                {loading ? "Memproses..." : "Generate ZIP (Server) - 5 Poin"}
-                            </Button>
+                            {/* Server Generate Button & Badge */}
+                            <div className="mt-2 space-y-2">
+                                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white shadow-lg" size="lg" onClick={handleGenerate} disabled={loading}>
+                                    <Download className="w-4 h-4 mr-2" />
+                                    {loading ? "Memproses..." : "Dapatkan File OSS Sekarang"}
+                                </Button>
+                                <div className="flex justify-center items-center">
+                                    <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded border border-green-200">
+                                        ✓ OSS-Ready: Validasi WGS84
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Upsell Banner */}
+                            <div className="mt-6 p-4 bg-slate-900 rounded-xl text-white border-2 border-amber-500 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 bg-amber-500 text-black text-[10px] font-black px-2 py-1 rounded-bl-lg z-10">DONE-FOR-YOU</div>
+                                <div className="absolute inset-0 bg-white/5 opacity-10"></div>
+                                <div className="relative z-10">
+                                    <h4 className="font-bold text-sm mb-1 text-amber-400">Bingung buat polygon?</h4>
+                                    <p className="text-xs opacity-90 mb-3">Kami buatkan untuk Anda — Rp 150.000 / polygon. Dijamin 100% lolos OSS.</p>
+                                    <Button asChild size="sm" className="w-full text-xs bg-amber-500 hover:bg-amber-600 text-black font-bold h-8">
+                                        <a href="https://wa.me/6288983840979?text=Halo%20Admin,%20saya%20ingin%20menggunakan%20jasa%20pembuatan%20polygon%20Done-For-You." target="_blank" rel="noreferrer">
+                                            Pesan Jasa Sekarang
+                                        </a>
+                                    </Button>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
