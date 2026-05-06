@@ -131,6 +131,80 @@ router.post('/export-image', verifyUser, async (req, res) => {
     }
 });
 
+// Ekstrak URL Google Maps (termasuk shortlink)
+router.post('/parse-maps-url', verifyUser, async (req, res) => {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'URL is required' });
+
+    try {
+        let finalUrl = url;
+        let text = '';
+        
+        try {
+            const fetchReq = await fetch(url, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
+            finalUrl = fetchReq.url;
+            text = await fetchReq.text();
+            
+            // Cek meta refresh jika HTTP status 200 tapi isinya redirect script/meta (biasa terjadi di Google Maps)
+            const metaRefresh = text.match(/content="0;URL='([^']+)'"/i) || text.match(/URL=(https:\/\/[^"]+)"/i);
+            if (metaRefresh && metaRefresh[1]) {
+                const url2 = metaRefresh[1].replace(/&amp;/g, '&');
+                const fetchReq2 = await fetch(url2, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
+                finalUrl = fetchReq2.url;
+                text = await fetchReq2.text();
+            }
+        } catch (fetchErr) {
+            console.error('[Parse-Maps] Fetch error:', fetchErr.message);
+        }
+
+        let lat = null;
+        let lng = null;
+
+        // 1. Ekstrak dari URL (contoh: @-6.123,106.123 atau q=-6.123,106.123)
+        let match = finalUrl.match(/@(-?\d+[\.,]\d+),(-?\d+[\.,]\d+)/) || finalUrl.match(/(?:q|ll)=(-?\d+[\.,]\d+)[,;](-?\d+[\.,]\d+)/);
+        
+        if (!match) {
+            // 2. Ekstrak dari URL pola !3d !4d
+            const latMatch = finalUrl.match(/!3d(-?\d+[\.,]\d+)/);
+            const lngMatch = finalUrl.match(/!4d(-?\d+[\.,]\d+)/);
+            if (latMatch && lngMatch) {
+                lat = latMatch[1];
+                lng = lngMatch[1];
+            }
+        } else {
+            lat = match[1];
+            lng = match[2];
+        }
+
+        // 3. Ekstrak dari Body HTML (APP_INITIALIZATION_STATE)
+        if (!lat || !lng) {
+            match = text.match(/window\.APP_INITIALIZATION_STATE.*?\[\[\[(-?\d+[\.,]\d+),(-?\d+[\.,]\d+)/);
+            if (match) {
+                 // Google Maps APP_INITIALIZATION_STATE urutannya biasanya [lng, lat]
+                 lat = match[2];
+                 lng = match[1];
+            } else {
+                 // Fallback ke !3d !4d di HTML
+                 const latMatch = text.match(/!3d(-?\d+[\.,]\d+)/);
+                 const lngMatch = text.match(/!4d(-?\d+[\.,]\d+)/);
+                 if (latMatch && lngMatch) {
+                     lat = latMatch[1];
+                     lng = lngMatch[1];
+                 }
+            }
+        }
+
+        if (lat && lng) {
+            return res.json({ lat: lat.replace(',', '.'), lng: lng.replace(',', '.') });
+        } else {
+            return res.status(400).json({ error: 'Tidak dapat menemukan koordinat dari link tersebut' });
+        }
+    } catch (error) {
+        console.error('[Parse-Maps] Critical Error:', error);
+        return res.status(500).json({ error: 'Gagal memproses link maps' });
+    }
+});
+
 function generateSHP(points, minX, minY, maxX, maxY) {
     // Record Content Calculation
     const numPoints = points.length;

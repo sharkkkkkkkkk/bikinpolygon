@@ -4,7 +4,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
 window.L = L;
 import 'leaflet-draw';
-import { MapContainer, TileLayer, WMSTileLayer, useMap, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, WMSTileLayer, useMap, Marker, Popup, Polygon as LeafletPolygon } from 'react-leaflet';
 import * as turf from '@turf/turf';
 import { download } from 'shp-write';
 import { Button } from '@/components/ui/button';
@@ -57,7 +57,7 @@ function MapController({ onReady, center, zoom }) {
     return null;
 }
 
-export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload }) {
+export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload, manualLat, manualLng, manualArea, resetTrigger }) {
     const [mapInstance, setMapInstance] = useState(null);
     const { toast } = useToast();
 
@@ -69,6 +69,61 @@ export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload 
     // Draw State
     const [drawnItems] = useState(new L.FeatureGroup());
     const [areaInfo, setAreaInfo] = useState(null);
+    const [hasDrawnPolygon, setHasDrawnPolygon] = useState(false);
+    const [previewPoints, setPreviewPoints] = useState(null);
+
+    // Effect to generate live preview of the square based on manual inputs
+    useEffect(() => {
+        // Jangan tampilkan preview jika user sedang/sudah menggambar manual
+        if (hasDrawnPolygon) {
+            setPreviewPoints(null);
+            return;
+        }
+
+        const lat = parseFloat(manualLat);
+        const lng = parseFloat(manualLng);
+        const area = parseFloat(manualArea);
+
+        // Jika data valid dan masuk akal
+        if (!isNaN(lat) && !isNaN(lng) && !isNaN(area) && area > 0) {
+            const sideMeters = Math.sqrt(area);
+            const halfSide = sideMeters / 2;
+            const DEG_TO_RAD = Math.PI / 180;
+            
+            // Konversi dari meter ke derajat (aproksimasi di ekuator)
+            const dLat = halfSide / 111320;
+            const dLng = halfSide / (111320 * Math.cos(lat * DEG_TO_RAD));
+
+            const mX = lng - dLng;
+            const MX = lng + dLng;
+            const mY = lat - dLat;
+            const MY = lat + dLat;
+
+            // Leaflet Polygon butuh format array of [lat, lng]
+            const points = [
+                [MY, mX], // Top-Left
+                [MY, MX], // Top-Right
+                [mY, MX], // Bottom-Right
+                [mY, mX]  // Bottom-Left
+            ];
+            
+            setPreviewPoints(points);
+        } else {
+            setPreviewPoints(null);
+        }
+    }, [manualLat, manualLng, manualArea, hasDrawnPolygon]);
+
+    // Effect to handle map reset (when user pastes new URL)
+    useEffect(() => {
+        if (resetTrigger > 0 && drawnItems) {
+            drawnItems.clearLayers();
+            setAreaInfo(null);
+            setHasDrawnPolygon(false);
+            if (onPolygonChangeRef.current) {
+                onPolygonChangeRef.current(null);
+            }
+        }
+    }, [resetTrigger, drawnItems]);
 
     // UseRef for callback stability
     const onPolygonChangeRef = useRef(onPolygonChange);
@@ -137,6 +192,7 @@ export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload 
             const totalHectares = totalSqMeters / 10000;
             const info = count > 0 ? { m2: totalSqMeters, ha: totalHectares } : null;
             setAreaInfo(info);
+            setHasDrawnPolygon(count > 0);
 
             if (onPolygonChangeRef.current) {
                 let lastGeo = null;
@@ -235,6 +291,19 @@ export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload 
                         transparent={true}
                         attribution="ATR/BPN"
                         zIndex={10}
+                    />
+                )}
+
+                {/* Preview kotak hasil generate input manual */}
+                {previewPoints && (
+                    <LeafletPolygon 
+                        positions={previewPoints} 
+                        pathOptions={{ 
+                            color: '#3b82f6', // blue-500
+                            weight: 3, 
+                            fillOpacity: 0.3, 
+                            dashArray: '8, 8' // garis putus-putus menandakan ini preview
+                        }} 
                     />
                 )}
 

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import api from '@/lib/api';
 import PaymentModal from '@/components/PaymentModal';
-import { Download, Search, Menu, X } from 'lucide-react';
+import { Download, Search, Menu, X, Plus, Minus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import DigitasiMap from '@/components/DigitasiMap';
 
 export default function Dashboard() {
@@ -20,6 +20,13 @@ export default function Dashboard() {
     const [lng, setLng] = useState('');
     const [area, setArea] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resetMapTrigger, setResetMapTrigger] = useState(0);
+
+    const handleResetMap = () => {
+        setResetMapTrigger(prev => prev + 1);
+        setCustomPolygon(null);
+        setArea('');
+    };
 
     // Sidebar Toggle
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -66,31 +73,123 @@ export default function Dashboard() {
         setLat(result.lat);
         setLng(result.lon);
         setMapCenter([parseFloat(result.lat), parseFloat(result.lon)]);
+        handleResetMap();
         setSearchResults([]);
         setSearchQuery(result.display_name);
         toast({ title: "Lokasi Dipilih", description: result.display_name });
     };
 
-    const parseUrl = (input) => {
+    // Helper functions for stepper buttons
+    const adjustLat = (delta) => {
+        setLat(prev => {
+            const current = parseFloat(String(prev).replace(',', '.')) || 0;
+            const next = current + delta;
+            // Limit to 7 decimal places for neatness
+            const nextStr = parseFloat(next.toFixed(7)).toString();
+            const parsedLng = parseFloat(String(lng).replace(',', '.'));
+            if (!isNaN(parsedLng)) setMapCenter([next, parsedLng]);
+            return nextStr;
+        });
+    };
+
+    const adjustLng = (delta) => {
+        setLng(prev => {
+            const current = parseFloat(String(prev).replace(',', '.')) || 0;
+            const next = current + delta;
+            const nextStr = parseFloat(next.toFixed(7)).toString();
+            const parsedLat = parseFloat(String(lat).replace(',', '.'));
+            if (!isNaN(parsedLat)) setMapCenter([parsedLat, next]);
+            return nextStr;
+        });
+    };
+
+    const adjustArea = (delta) => {
+        setArea(prev => {
+            const current = parseFloat(String(prev).replace(',', '.')) || 0;
+            const next = Math.max(0, current + delta); // Prevent negative area
+            return next.toString();
+        });
+    };
+
+    const parseUrl = async (input) => {
         setUrl(input);
-        const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-        const match = input.match(regex);
-        if (match) {
-            setLat(match[1]);
-            setLng(match[2]);
-            setMapCenter([parseFloat(match[1]), parseFloat(match[2])]);
-            toast({ title: "Koordinat Ditemukan", description: `${match[1]}, ${match[2]}` });
+        const strInput = String(input || '');
+        let parsedLat = null;
+        let parsedLng = null;
+
+        // 1. Prioritas !3d !4d
+        const latMatch = strInput.match(/!3d(-?\d+[\.,]\d+)/);
+        const lngMatch = strInput.match(/!4d(-?\d+[\.,]\d+)/);
+
+        if (latMatch && lngMatch) {
+            parsedLat = latMatch[1];
+            parsedLng = lngMatch[1];
+        } else {
+            // 2. Fallback @lat,lng
+            let match = strInput.match(/@(-?\d+[\.,]\d+),(-?\d+[\.,]\d+)/);
+            if (match) {
+                parsedLat = match[1];
+                parsedLng = match[2];
+            } else {
+                match = strInput.match(/(?:q|ll)=(-?\d+[\.,]\d+)[,;](-?\d+[\.,]\d+)/);
+                if (match) {
+                    parsedLat = match[1];
+                    parsedLng = match[2];
+                } else {
+                    const cleanStr = strInput.replace(/[\s]/g, '');
+                    const rawMatch = cleanStr.match(/^(-?\d+[\.,]\d+)[,;](-?\d+[\.,]\d+)$/);
+                    if (rawMatch) {
+                        parsedLat = rawMatch[1];
+                        parsedLng = rawMatch[2];
+                    }
+                }
+            }
+        }
+
+        if (parsedLat && parsedLng) {
+            parsedLat = parsedLat.replace(',', '.');
+            parsedLng = parsedLng.replace(',', '.');
+            setLat(parsedLat);
+            setLng(parsedLng);
+            const numLat = parseFloat(parsedLat);
+            const numLng = parseFloat(parsedLng);
+            
+            if (!isNaN(numLat) && !isNaN(numLng)) {
+                setMapCenter([numLat, numLng]);
+                handleResetMap();
+                toast({ title: "Koordinat Ditemukan", description: `${parsedLat}, ${parsedLng}` });
+            }
+        } else if (strInput.includes('goo.gl') || strInput.includes('maps.app.goo.gl') || strInput.startsWith('http')) {
+            toast({ title: "Mengekstrak Link...", description: "Sedang mengambil koordinat dari server..." });
+            try {
+                const res = await api.post('/generator/parse-maps-url', { url: input });
+                if (res.data && res.data.lat && res.data.lng) {
+                    setLat(res.data.lat);
+                    setLng(res.data.lng);
+                    const numLat = parseFloat(res.data.lat);
+                    const numLng = parseFloat(res.data.lng);
+                    if (!isNaN(numLat) && !isNaN(numLng)) {
+                        setMapCenter([numLat, numLng]);
+                        handleResetMap();
+                        toast({ title: "Koordinat Ditemukan", description: `${res.data.lat}, ${res.data.lng}` });
+                    }
+                }
+            } catch (error) {
+                toast({ title: "Gagal Ekstrak Link", description: error.response?.data?.error || "Gagal mengambil koordinat, silakan masukkan manual.", variant: "destructive" });
+            }
         }
     };
 
     // Called when user finishes drawing in DigitasiMap
     const handlePolygonChange = (data) => {
         setCustomPolygon(data);
-        setArea(data.area.toFixed(0));
+        if (data && data.area !== undefined) {
+            setArea(data.area.toFixed(0));
+        }
     };
 
     const handleGenerate = async () => {
-        const hasPolygon = !!customPolygon;
+        const hasPolygon = customPolygon && customPolygon.coordinates;
         const hasInputs = lat && lng && area;
 
         if (!hasPolygon && !hasInputs) {
@@ -106,13 +205,13 @@ export default function Dashboard() {
         setLoading(true);
         try {
             let payload = {};
-            if (customPolygon) {
+            if (hasPolygon) {
                 payload = { customPoints: customPolygon.coordinates };
             } else {
                 payload = {
-                    lat: parseFloat(lat),
-                    lng: parseFloat(lng),
-                    area: parseFloat(area)
+                    lat: parseFloat(String(lat).replace(',', '.')),
+                    lng: parseFloat(String(lng).replace(',', '.')),
+                    area: parseFloat(String(area).replace(',', '.'))
                 };
             }
 
@@ -177,6 +276,10 @@ export default function Dashboard() {
                         zoom={mapCenter ? 17 : 5}
                         onPolygonChange={handlePolygonChange}
                         onDownload={handleGenerate}
+                        manualLat={lat}
+                        manualLng={lng}
+                        manualArea={area}
+                        resetTrigger={resetMapTrigger}
                     />
                 </div>
 
@@ -246,17 +349,47 @@ export default function Dashboard() {
                                         className="bg-slate-50 border-slate-200 focus-visible:ring-amber-500"
                                     />
                                 </div>
-                            </div>
-
-                            {/* Manual Inputs / Readout */}
+                            </div>                            {/* Manual Inputs / Readout */}
                             <div className="grid grid-cols-2 gap-4 pt-2">
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs">Latitude</Label>
-                                    <Input value={lat} onChange={(e) => setLat(e.target.value)} className="h-8 text-xs bg-slate-50" />
+                                    <Label className="text-xs">Latitude (Y)</Label>
+                                    <div className="flex items-center">
+                                        <Button variant="outline" size="icon" onClick={() => adjustLat(-0.0001)} className="h-8 w-8 rounded-r-none border-r-0 focus:z-10 bg-slate-50 hover:bg-slate-200" title="Geser ke Selatan"><ChevronDown className="h-3 w-3" /></Button>
+                                        <Input 
+                                            value={lat} 
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setLat(val);
+                                                const parsed = parseFloat(String(val).replace(',', '.'));
+                                                const parsedLng = parseFloat(String(lng).replace(',', '.'));
+                                                if (!isNaN(parsed) && !isNaN(parsedLng)) {
+                                                    setMapCenter([parsed, parsedLng]);
+                                                }
+                                            }} 
+                                            className="h-8 text-xs bg-slate-50 text-center rounded-none px-1 focus:z-10" 
+                                        />
+                                        <Button variant="outline" size="icon" onClick={() => adjustLat(0.0001)} className="h-8 w-8 rounded-l-none border-l-0 focus:z-10 bg-slate-50 hover:bg-slate-200" title="Geser ke Utara"><ChevronUp className="h-3 w-3" /></Button>
+                                    </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs">Longitude</Label>
-                                    <Input value={lng} onChange={(e) => setLng(e.target.value)} className="h-8 text-xs bg-slate-50" />
+                                    <Label className="text-xs">Longitude (X)</Label>
+                                    <div className="flex items-center">
+                                        <Button variant="outline" size="icon" onClick={() => adjustLng(-0.0001)} className="h-8 w-8 rounded-r-none border-r-0 focus:z-10 bg-slate-50 hover:bg-slate-200" title="Geser ke Barat"><ChevronLeft className="h-3 w-3" /></Button>
+                                        <Input 
+                                            value={lng} 
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setLng(val);
+                                                const parsed = parseFloat(String(val).replace(',', '.'));
+                                                const parsedLat = parseFloat(String(lat).replace(',', '.'));
+                                                if (!isNaN(parsed) && !isNaN(parsedLat)) {
+                                                    setMapCenter([parsedLat, parsed]);
+                                                }
+                                            }} 
+                                            className="h-8 text-xs bg-slate-50 text-center rounded-none px-1 focus:z-10" 
+                                        />
+                                        <Button variant="outline" size="icon" onClick={() => adjustLng(0.0001)} className="h-8 w-8 rounded-l-none border-l-0 focus:z-10 bg-slate-50 hover:bg-slate-200" title="Geser ke Timur"><ChevronRight className="h-3 w-3" /></Button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -265,19 +398,21 @@ export default function Dashboard() {
                                     <Label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Luas Area (m²)</Label>
                                     {customPolygon && <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full">✓ Polygon Aktif</span>}
                                 </div>
-                                <div className="relative">
-                                    <Input
-                                        type="number"
-                                        value={area}
-                                        onChange={(e) => setArea(e.target.value)}
-                                        placeholder="0"
-                                        className="font-mono text-right pr-8 border-slate-200 focus-visible:ring-amber-500"
-                                    />
-                                    <span className="absolute right-3 top-2.5 text-xs text-slate-400">m²</span>
+                                <div className="flex items-center shadow-sm">
+                                    <Button variant="outline" size="icon" onClick={() => adjustArea(-10)} className="h-10 w-12 shrink-0 rounded-r-none border-r-0 focus:z-10 bg-slate-100 hover:bg-slate-200" title="Kurangi 10m²"><Minus className="h-4 w-4 text-slate-700" /></Button>
+                                    <div className="relative flex-1">
+                                        <Input
+                                            type="number"
+                                            value={area}
+                                            onChange={(e) => setArea(e.target.value)}
+                                            placeholder="0"
+                                            className="h-10 font-mono text-center text-base border-slate-200 focus-visible:ring-amber-500 rounded-none z-0 focus:z-10 w-full"
+                                        />
+                                        <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-bold pointer-events-none">m²</span>
+                                    </div>
+                                    <Button variant="outline" size="icon" onClick={() => adjustArea(10)} className="h-10 w-12 shrink-0 rounded-l-none border-l-0 focus:z-10 bg-slate-100 hover:bg-slate-200" title="Tambah 10m²"><Plus className="h-4 w-4 text-slate-700" /></Button>
                                 </div>
                             </div>
-
-                            {/* Server Generate Button & Badge */}
                             <div className="mt-2 space-y-2">
                                 <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white shadow-lg" size="lg" onClick={handleGenerate} disabled={loading}>
                                     <Download className="w-4 h-4 mr-2" />
