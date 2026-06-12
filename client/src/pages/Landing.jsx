@@ -154,6 +154,29 @@ const Reveal = ({ children, delay = 0, className = "" }) => {
     );
 };
 
+// --- DATA TESTIMONI ---
+const testimonials1 = [
+    { name: "Budi Santoso", role: "Konsultan Perizinan", text: "Sangat membantu! Pembuatan polygon NIB OSS yang biasanya berjam-jam jadi 5 menit." },
+    { name: "Siti Aminah", role: "Pemilik UMKM", text: "Awalnya bingung soal koordinat OSS, dengan LineSima langsung beres dan valid." },
+    { name: "Hendro W.", role: "Notaris", text: "Klien saya sangat puas karena proses perizinan gudang jadi sangat cepat." },
+    { name: "Ahmad R.", role: "Kontraktor", text: "Format SHP yang dihasilkan 100% kompatibel dan lolos verifikasi sistem BPN." },
+    { name: "Maria L.", role: "Pengusaha F&B", text: "Sangat mudah digunakan! Tidak perlu pusing belajar QGIS lagi." },
+    { name: "Kevin T.", role: "Developer Properti", text: "LineSima menyelamatkan proyek perumahan kami dari keterlambatan izin." },
+    { name: "Dina M.", role: "Staff Legal", text: "Bisa langsung dapat file polygon standar OSS RBA tanpa nunggu biro jasa." },
+    { name: "Ridwan K.", role: "Pemilik Pabrik", text: "Super cepat. Luas lahan otomatis terhitung dengan akurat. Sangat recommended!" }
+];
+
+const testimonials2 = [
+    { name: "Arif S.", role: "Arsitek", text: "Overlay peta BPN-nya sangat membantu untuk memastikan batas tanah akurat." },
+    { name: "Lina F.", role: "HRD & Legal", text: "Dulu pusing kalau disuruh buat polygon NIB perusahaan. Sekarang tinggal klik." },
+    { name: "Surya P.", role: "Agen Real Estate", text: "Sistem tokennya sangat hemat. 5 token cukup untuk satu SHP yang sangat presisi." },
+    { name: "Bambang H.", role: "Pemilik Klinik", text: "Saya pakai jasa Done-For-You, adminnya sangat responsif dan file langsung jadi." },
+    { name: "Yusuf M.", role: "Kepala Desa", text: "Membantu warga desa kami dalam pengurusan perizinan tanah secara mandiri." },
+    { name: "Maya S.", role: "Startup Founder", text: "Proses setup izin lokasi startup kami selesai dalam satu hari berkat LineSima." },
+    { name: "Toni D.", role: "Surveyor", text: "Cetak laporan PDF-nya sangat rapi dan profesional, cocok untuk lampiran klien." },
+    { name: "Reza A.", role: "Pemilik Lahan", text: "Website ini ajaib. Tinggal gambar titik koordinat, langsung otomatis terdeteksi valid." }
+];
+
 // --- MAIN PAGE ---
 
 export default function Landing() {
@@ -477,7 +500,7 @@ export default function Landing() {
                     <Reveal delay={100}>
                         <div className="max-w-5xl mx-auto">
                             <TiltCard className="bg-[#39FF14] p-4 md:p-8 rounded-[40px] border-4 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] relative group cursor-pointer">
-                                <div className="absolute -top-6 -left-6 bg-white text-black font-black uppercase p-4 rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-10 w-24 h-24 flex items-center justify-center text-center text-xl transform -rotate-12 group-hover:rotate-12 transition-transform duration-300">
+                                <div className="absolute -top-4 -left-2 md:-top-6 md:-left-6 bg-white text-black font-black uppercase p-2 md:p-4 rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-10 w-16 h-16 md:w-24 md:h-24 flex items-center justify-center text-center text-xs md:text-xl transform -rotate-12 group-hover:rotate-12 transition-transform duration-300">
                                     ▶ PLAY
                                 </div>
                                 <div className="aspect-video w-full rounded-[24px] overflow-hidden border-4 border-black bg-black relative">
@@ -498,11 +521,71 @@ export default function Landing() {
                 </div>
             </section>
 
+            {/* TESTIMONIAL SECTION */}
+            <section className="py-24 bg-[#1D4ED8] text-white overflow-hidden border-y-8 border-black">
+                <div className="container px-4 max-w-[1400px] mx-auto mb-16">
+                    <Reveal>
+                        <div className="text-center flex flex-col items-center">
+                            <Badge className="bg-[#39FF14] text-black hover:bg-[#39FF14] font-mono font-bold text-sm px-4 py-2 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-6 rounded-lg uppercase cursor-default">
+                                // 10.000+ Pengguna
+                            </Badge>
+                            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.05] uppercase max-w-3xl">
+                                Dipercaya Ratusan UMKM & Perusahaan Besar
+                            </h2>
+                        </div>
+                    </Reveal>
+                </div>
+
+                {/* Marquee Row 1 (Left) */}
+                <div className="relative flex whitespace-nowrap overflow-hidden py-4 -rotate-1 bg-white/5 border-y-2 border-white/10 shadow-xl z-10 w-[110%] -ml-[5%]">
+                    <div className="animate-[marquee_40s_linear_infinite] flex gap-6 items-center">
+                        {[...testimonials1, ...testimonials1, ...testimonials1, ...testimonials1].map((item, i) => (
+                            <TiltCard key={i} className="w-[280px] md:w-[350px] shrink-0 bg-white text-black p-4 md:p-6 rounded-[20px] md:rounded-3xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(57,255,20,1)] md:shadow-[8px_8px_0px_0px_rgba(57,255,20,1)] hover:shadow-[10px_10px_0px_0px_rgba(57,255,20,1)] transition-all cursor-default whitespace-normal relative group">
+                                <div className="absolute top-4 right-6 text-4xl text-[#39FF14] opacity-30 font-serif">"</div>
+                                <div className="flex items-center gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(star => <svg key={star} className="w-5 h-5 text-amber-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}
+                                </div>
+                                <p className="font-bold text-lg mb-6 leading-tight group-hover:text-[#1D4ED8] transition-colors line-clamp-3">"{item.text}"</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-black flex items-center justify-center font-black text-xl text-slate-500">{item.name[0]}</div>
+                                    <div>
+                                        <div className="font-black text-sm uppercase">{item.name}</div>
+                                        <div className="font-mono text-xs text-slate-500">{item.role}</div>
+                                    </div>
+                                </div>
+                            </TiltCard>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Marquee Row 2 (Right) */}
+                <div className="relative flex whitespace-nowrap overflow-hidden py-4 rotate-1 bg-black/20 border-y-2 border-black shadow-xl z-20 mt-4 w-[110%] -ml-[5%]">
+                    <div className="animate-[marquee-right_40s_linear_infinite] flex gap-6 items-center">
+                        {[...testimonials2, ...testimonials2, ...testimonials2, ...testimonials2].map((item, i) => (
+                            <TiltCard key={i} className="w-[280px] md:w-[350px] shrink-0 bg-[#F8FAFC] text-black p-4 md:p-6 rounded-[20px] md:rounded-3xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(255,255,255,1)] md:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[10px_10px_0px_0px_rgba(255,255,255,1)] transition-all cursor-default whitespace-normal relative group">
+                                <div className="absolute top-4 right-6 text-4xl text-[#1D4ED8] opacity-20 font-serif">"</div>
+                                <div className="flex items-center gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(star => <svg key={star} className="w-5 h-5 text-amber-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}
+                                </div>
+                                <p className="font-bold text-lg mb-6 leading-tight group-hover:text-[#1D4ED8] transition-colors line-clamp-3">"{item.text}"</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-[#39FF14] border-2 border-black flex items-center justify-center font-black text-xl text-black">{item.name[0]}</div>
+                                    <div>
+                                        <div className="font-black text-sm uppercase">{item.name}</div>
+                                        <div className="font-mono text-xs text-slate-500">{item.role}</div>
+                                    </div>
+                                </div>
+                            </TiltCard>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* PRICING SECTION */}
             <section className="py-32 bg-white border-y-8 border-black">
                 <div className="container px-4 max-w-[1400px] mx-auto">
                     <Reveal>
-                        <div className="bg-black text-white rounded-[60px] p-12 lg:p-20 relative shadow-[16px_16px_0px_0px_rgba(57,255,20,1)] border-4 border-black overflow-hidden group">
+                        <div className="bg-black text-white rounded-[40px] md:rounded-[60px] p-8 md:p-12 lg:p-20 relative shadow-[10px_10px_0px_0px_rgba(57,255,20,1)] md:shadow-[16px_16px_0px_0px_rgba(57,255,20,1)] border-4 border-black overflow-hidden group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-[#1D4ED8] rounded-bl-full opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                             
                             <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
@@ -604,6 +687,10 @@ export default function Landing() {
                 @keyframes marquee {
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-50%); }
+                }
+                @keyframes marquee-right {
+                    0% { transform: translateX(-50%); }
+                    100% { transform: translateX(0); }
                 }
             `}} />
 
