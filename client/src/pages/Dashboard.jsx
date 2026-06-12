@@ -7,8 +7,10 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import api from '@/lib/api';
 import PaymentModal from '@/components/PaymentModal';
-import { Download, Search, Menu, X, Plus, Minus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Download, Search, Menu, X, Plus, Minus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import DigitasiMap from '@/components/DigitasiMap';
+import domtoimage from 'dom-to-image-more';
+
 
 export default function Dashboard() {
     const { user, updateBalance, logout } = useAuth();
@@ -20,7 +22,9 @@ export default function Dashboard() {
     const [lng, setLng] = useState('');
     const [area, setArea] = useState('');
     const [loading, setLoading] = useState(false);
+    const [pdfLoading, setPdfLoading] = useState(false);
     const [resetMapTrigger, setResetMapTrigger] = useState(0);
+
 
     const handleResetMap = () => {
         setResetMapTrigger(prev => prev + 1);
@@ -39,6 +43,7 @@ export default function Dashboard() {
     // Map State Glue
     const [mapCenter, setMapCenter] = useState(null); // [lat, lng]
     const [customPolygon, setCustomPolygon] = useState(null); // { area, coordinates, geojson }
+    const [mapInstance, setMapInstance] = useState(null);
 
     const handleSearch = async () => {
         if (!searchQuery) return;
@@ -234,6 +239,108 @@ export default function Dashboard() {
         }
     };
 
+    const handleGeneratePDF = async () => {
+        const hasPolygon = customPolygon && customPolygon.coordinates;
+        const hasInputs = lat && lng && area;
+
+        if (!hasPolygon && !hasInputs) {
+            toast({ title: "Error", description: "Harap gambar polygon atau isi data manual.", variant: "destructive" });
+            return;
+        }
+
+        if (user.token_balance < 5) {
+            toast({ title: "Saldo Kurang", description: "Hubungi admin untuk top up.", variant: "destructive" });
+            return;
+        }
+
+        setPdfLoading(true);
+        try {
+            const mapElement = document.querySelector('.leaflet-container');
+            let mapImage = '';
+            
+            try {
+                if (mapElement) {
+                    // Sembunyikan kontrol peta Leaflet agar screenshot bersih
+                    const controls = mapElement.querySelector('.leaflet-control-container');
+                    const prevDisplay = controls ? controls.style.display : '';
+                    if (controls) controls.style.display = 'none';
+
+                    mapImage = await domtoimage.toPng(mapElement, {
+                        width: mapElement.clientWidth,
+                        height: mapElement.clientHeight,
+                        cacheBust: true,
+                        imagePlaceholder: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+                    });
+                    
+                    if (controls) controls.style.display = prevDisplay;
+                }
+            } catch (screenshotError) {
+                console.warn("Gagal mengambil tangkapan layar peta (CORS/Taint):", screenshotError);
+                mapImage = ''; // Lanjutkan generate PDF tanpa gambar peta
+            }
+
+
+            let projectedPoints = [];
+            if (hasPolygon && mapInstance) {
+                const container = mapInstance.getContainer();
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                projectedPoints = customPolygon.coordinates.map(pt => {
+                    const px = mapInstance.latLngToContainerPoint([pt[1], pt[0]]);
+                    return { x_pct: px.x / w, y_pct: px.y / h, lat: pt[1], lng: pt[0] };
+                });
+            }
+
+            let payload = {
+                mapImage,
+                area: parseFloat(String(area).replace(',', '.')),
+                projectedPoints: projectedPoints.length > 0 ? projectedPoints : undefined
+            };
+
+            if (hasPolygon) {
+                payload.customPoints = customPolygon.coordinates;
+                if (customPolygon.coordinates.length > 0) {
+                    const firstPt = customPolygon.coordinates[0];
+                    payload.lng = firstPt[0];
+                    payload.lat = firstPt[1];
+                }
+            } else {
+                payload.lat = parseFloat(String(lat).replace(',', '.'));
+                payload.lng = parseFloat(String(lng).replace(',', '.'));
+            }
+
+            const response = await api.post('/generator/create-pdf', payload, { responseType: 'blob' });
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `Laporan_Geospasial_${Date.now()}.pdf`;
+            link.click();
+
+            updateBalance(user.token_balance - 5);
+            toast({ title: "Sukses", description: "Laporan PDF berhasil dicetak!" });
+
+        } catch (error) {
+            console.error(error);
+            let errMsg = "Gagal membuat laporan PDF.";
+            if (error.response?.data instanceof Blob) {
+                try {
+                    const text = await error.response.data.text();
+                    const parsed = JSON.parse(text);
+                    if (parsed && parsed.error) errMsg = parsed.error;
+                } catch (e) {
+                    // Ignore parsing error
+                }
+            } else if (error.response?.data?.error) {
+                errMsg = error.response.data.error;
+            }
+            toast({ title: "Error", description: errMsg, variant: "destructive" });
+        } finally {
+            setPdfLoading(false);
+        }
+    };
+
+
     return (
         <div className="h-screen w-full bg-slate-50 flex flex-col overflow-hidden">
             {/* Header - Fixed Top (z-30) */}
@@ -280,6 +387,7 @@ export default function Dashboard() {
                         manualLng={lng}
                         manualArea={area}
                         resetTrigger={resetMapTrigger}
+                        onMapReady={setMapInstance}
                     />
                 </div>
 
@@ -413,18 +521,24 @@ export default function Dashboard() {
                                     <Button variant="outline" size="icon" onClick={() => adjustArea(10)} className="h-10 w-12 shrink-0 rounded-l-none border-l-0 focus:z-10 bg-slate-100 hover:bg-slate-200" title="Tambah 10m²"><Plus className="h-4 w-4 text-slate-700" /></Button>
                                 </div>
                             </div>
-                            <div className="mt-2 space-y-2">
-                                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white shadow-lg" size="lg" onClick={handleGenerate} disabled={loading}>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    {loading ? "Memproses..." : "Dapatkan File OSS Sekarang"}
+                            <div className="mt-2 flex gap-2">
+                                <Button className="flex-1 bg-slate-900 hover:bg-slate-800 text-white shadow-lg" size="lg" onClick={handleGenerate} disabled={loading || pdfLoading}>
+                                    <Download className="w-4 h-4 mr-2 shrink-0" />
+                                    <span className="truncate">{loading ? "Memproses..." : "File OSS"}</span>
                                 </Button>
-                                <div className="flex justify-center items-center">
-                                    <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded border border-green-200">
-                                        ✓ OSS-Ready: Validasi WGS84
-                                    </span>
-                                </div>
+                                <Button className="flex-1 bg-amber-500 hover:bg-amber-600 text-white shadow-md font-bold" size="lg" onClick={handleGeneratePDF} disabled={loading || pdfLoading}>
+                                    <FileText className="w-4 h-4 mr-2 shrink-0" />
+                                    <span className="truncate">{pdfLoading ? "Mencetak..." : "Cetak PDF"}</span>
+                                </Button>
+                            </div>
+                            <div className="flex justify-center items-center mt-2">
+                                <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded border border-green-200">
+                                    ✓ OSS-Ready: Validasi WGS84
+                                </span>
                             </div>
 
+                            {/* Floating Generate PDF Button on the Right Side of the screen */}
+                            {/* We will portal or place this absolutely relative to the main container */}
                             {/* Upsell Banner */}
                             <div className="mt-6 p-4 bg-slate-900 rounded-xl text-white border-2 border-amber-500 relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 bg-amber-500 text-black text-[10px] font-black px-2 py-1 rounded-bl-lg z-10">DONE-FOR-YOU</div>
@@ -454,6 +568,18 @@ export default function Dashboard() {
                         <Menu className="h-4 w-4" /> Buka Generator Tool
                     </Button>
                 )}
+
+                {/* Floating Generate PDF Button on the right */}
+                <div className="absolute right-6 bottom-10 z-40 flex flex-col items-end gap-2 pointer-events-none">
+                    <Button 
+                        className="bg-amber-500 hover:bg-amber-600 text-white shadow-2xl rounded-full h-14 px-6 font-bold flex items-center gap-2 border-2 border-white pointer-events-auto transition-transform hover:scale-105"
+                        onClick={handleGeneratePDF} 
+                        disabled={loading || pdfLoading}
+                    >
+                        <FileText className="w-5 h-5" />
+                        {pdfLoading ? "Mencetak..." : "Cetak Laporan PDF"}
+                    </Button>
+                </div>
 
             </main>
         </div>

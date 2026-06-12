@@ -65,6 +65,7 @@ const globalLimiter = rateLimit({
     message: { error: 'Terlalu banyak permintaan, coba lagi nanti.' },
     standardHeaders: 'draft-7',
     legacyHeaders: false,
+    skip: (req, res) => req.path.includes('/proxy-tile'), // Pengecualian untuk tile proxy agar map tidak error
 });
 app.use(globalLimiter);
 

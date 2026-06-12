@@ -57,9 +57,15 @@ function MapController({ onReady, center, zoom }) {
     return null;
 }
 
-export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload, manualLat, manualLng, manualArea, resetTrigger }) {
+export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload, manualLat, manualLng, manualArea, resetTrigger, onMapReady }) {
     const [mapInstance, setMapInstance] = useState(null);
     const { toast } = useToast();
+
+    useEffect(() => {
+        if (mapInstance && onMapReady) {
+            onMapReady(mapInstance);
+        }
+    }, [mapInstance, onMapReady]);
 
     // Basemap & BPN State
     const [isSatellite, setIsSatellite] = useState(true);
@@ -271,14 +277,18 @@ export default function DigitasiMap({ center, zoom, onPolygonChange, onDownload,
                 {isSatellite ? (
                     <TileLayer
                         attribution='&copy; Google Maps'
-                        url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+                        url={`${import.meta.env.VITE_API_URL || '/api'}/generator/proxy-tile?url=https://mt1.google.com/vt/lyrs=y%26x={x}%26y={y}%26z={z}`}
                         maxZoom={22}
+                        maxNativeZoom={20}
+                        crossOrigin="anonymous"
                     />
                 ) : (
                     <TileLayer
                         attribution='&copy; Google Maps'
-                        url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                        url={`${import.meta.env.VITE_API_URL || '/api'}/generator/proxy-tile?url=https://mt1.google.com/vt/lyrs=m%26x={x}%26y={y}%26z={z}`}
                         maxZoom={22}
+                        maxNativeZoom={20}
+                        crossOrigin="anonymous"
                     />
                 )}
 
