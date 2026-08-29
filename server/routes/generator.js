@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
 const archiver = require('archiver');
 const PDFDocument = require('pdfkit');
-
+const { authorizeExportService } = require('../services/authorizationService');
+const { generateSHP, generateSHX, generateDBF } = require('../utils/shpHelper');
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -13,58 +14,67 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const DEG_TO_RAD = Math.PI / 180;
 
-const verifyUser = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'No token' });
-    jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, decoded) => {
-        if (err) return res.status(403).json({ error: 'Invalid token' });
-        req.user = decoded;
-        next();
-    });
-};
+const { verifyUser, verifyAdmin } = require('../middleware/authMiddleware');
 
+// Public Config Endpoint
+router.get('/config', (req, res) => {
+    res.json({
+        FREE_DEVICE_TRIAL_LIMIT: 1
+    });
+});
+
+// Central Export Authorization Endpoint
+router.post('/authorize-export', verifyUser, async (req, res) => {
+    const { exportType, customPoints, lat, lng, area, exportRequestId } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const result = await authorizeExportService(supabase, userId, {
+            exportType: exportType || 'OSS_SHP',
+            customPoints,
+            lat,
+            lng,
+            area,
+            exportRequestId
+        });
+        res.json(result);
+    } catch (err) {
+        console.error('[Authorize-Export] Error:', err);
+        const status = err.status || 500;
+        res.status(status).json(err);
+    }
+});
+
+// Generate SHP ZIP - Free <= 50m2 or Deduct Tokens
 router.post('/create', verifyUser, async (req, res) => {
-    const { lat, lng, area, customPoints } = req.body;
+    const { lat, lng, area, customPoints, exportRequestId } = req.body;
     const user_id = req.user.id;
 
     if ((!lat || !lng || !area) && !customPoints) return res.status(400).json({ error: 'Missing parameters' });
 
     try {
-        console.log(`[Generator] Request from User: ${user_id}`);
+        console.log(`[Generator-SHP] Request from User: ${user_id}`);
 
-        // 1. Check tokens
-        const { data: user, error: userError } = await supabase.from('users').select('token_balance').eq('id', user_id).single();
-
-        if (userError) {
-            console.error('[Generator] DB Error:', userError);
-            throw new Error('Database error fetching user');
-        }
-
-        if (!user || user.token_balance < 5) {
-            return res.status(403).json({ error: 'Insufficient tokens' });
-        }
-
-        // 2. Deduct tokens
-        const { error: updateError } = await supabase.from('users').update({ token_balance: user.token_balance - 5 }).eq('id', user_id);
-        if (updateError) {
-            console.error('[Generator] Deduct Error:', updateError);
-            throw updateError;
-        }
+        // 1. Authorize & Deduct if needed
+        const authResult = await authorizeExportService(supabase, user_id, {
+            exportType: 'OSS_SHP',
+            customPoints,
+            lat,
+            lng,
+            area,
+            exportRequestId
+        });
 
         let points = [];
         let minX = 180, maxX = -180, minY = 90, maxY = -90;
 
         if (customPoints && Array.isArray(customPoints) && customPoints.length >= 3) {
-            // Use custom points (expecting [[lng, lat], ...])
-            // Ensure closed loop
             points = [...customPoints];
             const first = points[0];
             const last = points[points.length - 1];
             if (first[0] !== last[0] || first[1] !== last[1]) {
                 points.push(first);
             }
-
-            // Calculate BBOX
             for (let p of points) {
                 if (p[0] < minX) minX = p[0];
                 if (p[0] > maxX) maxX = p[0];
@@ -72,32 +82,24 @@ router.post('/create', verifyUser, async (req, res) => {
                 if (p[1] > maxY) maxY = p[1];
             }
         } else {
-            // 3. Calculate Geometry (Square) Fallback
             const sideMeters = Math.sqrt(area);
             const halfSide = sideMeters / 2;
             const dLat = halfSide / 111320;
             const dLng = halfSide / (111320 * Math.cos(lat * DEG_TO_RAD));
 
-            const mX = lng - dLng;
-            const MX = lng + dLng;
-            const mY = lat - dLat;
-            const MY = lat + dLat;
+            minX = lng - dLng; maxX = lng + dLng;
+            minY = lat - dLat; maxY = lat + dLat;
 
-            minX = mX; maxX = MX; minY = mY; maxY = MY;
-
-            // Clockwise ring for Outer
             points = [
                 [minX, maxY], [maxX, maxY], [maxX, minY], [minX, minY], [minX, maxY]
             ];
         }
 
-        // 4. Generate Buffers
         const shp = generateSHP(points, minX, minY, maxX, maxY);
-        const shx = generateSHX(points, minX, minY, maxX, maxY, shp.length);
+        const shx = generateSHX(points, minX, minY, maxX, maxY);
         const dbf = generateDBF();
         const prj = 'GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]]';
 
-        // 5. ZIP and Send
         res.attachment('polygon.zip');
         const archive = archiver('zip', { zlib: { level: 9 } });
         archive.pipe(res);
@@ -108,72 +110,67 @@ router.post('/create', verifyUser, async (req, res) => {
         archive.finalize();
 
     } catch (err) {
-        console.error('[Generator] Critical Error:', err);
-        res.status(500).json({ error: err.message || 'Server Generation Failed' });
+        console.error('[Generator-SHP] Error:', err);
+        const status = err.status || 500;
+        res.status(status).json({ error: err.error || err.message || 'Server Generation Failed', code: err.code });
     }
 });
 
-// Export Image - Deduct 2 tokens
+// Export Image - Free <= 50m2 or Deduct 2 Tokens
 router.post('/export-image', verifyUser, async (req, res) => {
+    const { customPoints, lat, lng, area, exportRequestId } = req.body;
     const user_id = req.user.id;
 
     try {
-        // 1. Check tokens
-        const { data: user } = await req.supabase.from('users').select('token_balance').eq('id', user_id).single();
-        if (!user || user.token_balance < 2) return res.status(403).json({ error: 'Insufficient tokens (need 2)' });
+        const authResult = await authorizeExportService(supabase, user_id, {
+            exportType: 'EXPORT_IMAGE',
+            customPoints,
+            lat,
+            lng,
+            area,
+            exportRequestId
+        });
 
-        // 2. Deduct tokens
-        const newBalance = user.token_balance - 2;
-        const { error } = await supabase.from('users').update({ token_balance: newBalance }).eq('id', user_id);
-        if (error) throw error;
-
-        res.json({ success: true, newBalance, message: 'Export authorized, 2 tokens deducted' });
+        res.json({ success: true, newBalance: authResult.newBalance, isFreeTier: authResult.isFreeTier, message: authResult.message });
     } catch (err) {
-        res.status(500).json({ error: err.message || 'Server Generation Failed' });
+        const status = err.status || 500;
+        res.status(status).json({ error: err.error || err.message || 'Server Generation Failed', code: err.code });
     }
 });
 
-// Generate PDF - Deduct 5 tokens
+// Generate PDF - Free <= 50m2 or Deduct 5 Tokens
 router.post('/create-pdf', verifyUser, async (req, res) => {
-    const { lat, lng, area, customPoints, mapImage, projectedPoints } = req.body;
+    const { lat, lng, area, customPoints, mapImage, projectedPoints, exportRequestId } = req.body;
     const user_id = req.user.id;
 
     if ((!lat || !lng || !area) && !customPoints) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
 
-    const formattedLat = (lat !== undefined && lat !== null && !isNaN(parseFloat(lat))) ? parseFloat(lat).toFixed(7) : '-';
-    const formattedLng = (lng !== undefined && lng !== null && !isNaN(parseFloat(lng))) ? parseFloat(lng).toFixed(7) : '-';
-
     try {
         console.log(`[Generator-PDF] Request from User: ${user_id}`);
 
-        // 1. Check tokens
-        const { data: user, error: userError } = await supabase.from('users').select('token_balance').eq('id', user_id).single();
+        // 1. Authorize & Deduct if needed
+        const authResult = await authorizeExportService(supabase, user_id, {
+            exportType: 'OSS_PDF',
+            customPoints,
+            lat,
+            lng,
+            area,
+            exportRequestId
+        });
 
-        if (userError) throw new Error('Database error fetching user');
-        if (!user || user.token_balance < 5) return res.status(403).json({ error: 'Insufficient tokens' });
-
-        // 2. Deduct tokens
-        const { error: updateError } = await supabase.from('users').update({ token_balance: user.token_balance - 5 }).eq('id', user_id);
-        if (updateError) throw updateError;
-
-        // 3. Generate PDF (A4 Landscape layout)
         const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 30 });
-        
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=laporan_geospasial_${Date.now()}.pdf`);
         doc.pipe(res);
 
-        // --- CLEAN SIMPLE LAYOUT ---
-        // A4 Landscape is 841.89 x 595.28
-        
         // Header
         doc.fillColor('#1e293b').font('Helvetica-Bold').fontSize(16).text('Laporan Digitasi Geospasial', 30, 30);
-        doc.fillColor('#64748b').font('Helvetica').fontSize(10).text('Generated by LineSima System', 30, 50);
-        
+        doc.fillColor('#64748b').font('Helvetica').fontSize(10).text('Generated by BikinPolygon System', 30, 50);
+
         doc.fillColor('#1e293b').font('Helvetica-Bold').fontSize(10).text('Luas Lahan: ', 600, 30, { align: 'right' });
-        doc.font('Helvetica').text(`${area} m²`, 600, 45, { align: 'right' });
+        doc.font('Helvetica').text(`${authResult.calculatedArea ? authResult.calculatedArea.toFixed(2) : area} m²`, 600, 45, { align: 'right' });
 
         doc.moveTo(30, 70).lineTo(811.89, 70).lineWidth(1).strokeColor('#cbd5e1').stroke();
 
@@ -211,7 +208,6 @@ router.post('/create-pdf', verifyUser, async (req, res) => {
                     
                     const plottedCoords = projectedPoints.map(pt => [offsetX + (pt.x_pct * drawW), offsetY + (pt.y_pct * drawH)]);
 
-                    // Polygon Style
                     doc.lineWidth(2).strokeColor('#ef4444');
                     plottedCoords.forEach((pt, idx) => idx === 0 ? doc.moveTo(pt[0], pt[1]) : doc.lineTo(pt[0], pt[1]));
                     doc.closePath().fillOpacity(0.2).fillColor('#ef4444').fill();
@@ -219,7 +215,6 @@ router.post('/create-pdf', verifyUser, async (req, res) => {
                     plottedCoords.forEach((pt, idx) => idx === 0 ? doc.moveTo(pt[0], pt[1]) : doc.lineTo(pt[0], pt[1]));
                     doc.closePath().strokeOpacity(1.0).strokeColor('#ef4444').stroke();
 
-                    // Vertices
                     plottedCoords.forEach((pt, idx) => {
                         doc.circle(pt[0], pt[1], 4).lineWidth(1.5).strokeColor('#ef4444').fillOpacity(1.0).fillColor('#ffffff').fillAndStroke();
                         doc.fillColor('#1e293b').font('Helvetica-Bold').fontSize(10).text(`${idx + 1}`, pt[0] + 6, pt[1] - 10);
@@ -267,7 +262,7 @@ router.post('/create-pdf', verifyUser, async (req, res) => {
 
         doc.font('Helvetica').fontSize(8);
         let rowY = tTop + 20;
-        const maxDisplay = 20; // Fit more rows since it's a clean layout
+        const maxDisplay = 20;
         const displayCoords = coordsList.slice(0, maxDisplay);
         
         displayCoords.forEach((p, idx) => {
@@ -291,9 +286,97 @@ router.post('/create-pdf', verifyUser, async (req, res) => {
         doc.end();
 
     } catch (err) {
-        console.error('[PDF-Generator] Server Error:', err);
-        res.status(500).json({ error: err.message || 'Server Generation Failed' });
+        console.error('[PDF-Generator] Error:', err);
+        const status = err.status || 500;
+        res.status(status).json({ error: err.error || err.message || 'Server Generation Failed', code: err.code });
     }
+});
+
+const fs = require('fs');
+const path = require('path');
+
+// Save Form Submission to CSV Spreadsheet in Background
+router.post('/save-submission', async (req, res) => {
+    try {
+        const {
+            PEMRAKARSA = '',
+            KEGIATAN = '',
+            NO_TELEPON = '',
+            TAHUN = '',
+            PROVINSI = '',
+            KOTA = '',
+            KECAMATAN = '',
+            ALAMAT = '',
+            KETERANGAN = '',
+            isAmdalMode = false,
+            exportType = ''
+        } = req.body;
+
+        const uploadsDir = path.join(__dirname, '../uploads');
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        const csvPath = path.join(uploadsDir, 'data_pemohon_spreadsheet.csv');
+        const fileExists = fs.existsSync(csvPath);
+
+        // Header if file doesn't exist
+        const header = 'TIMESTAMP,PEMRAKARSA,KEGIATAN,NO_TELEPON,MODE_AMDALNET,TAHUN,PROVINSI,KOTA,KECAMATAN,ALAMAT,KETERANGAN,EXPORT_TYPE\n';
+        if (!fileExists) {
+            fs.writeFileSync(csvPath, '\uFEFF' + header, 'utf8'); // UTF-8 BOM for Excel / Spreadsheet
+        }
+
+        const sanitizeCsv = (str) => {
+            let val = String(str || '').replace(/"/g, '""');
+            if (/^[=+\-@\t\r]/.test(val)) {
+                val = "'" + val;
+            }
+            return `"${val}"`;
+        };
+        const timestamp = new Date().toISOString();
+        const row = [
+            sanitizeCsv(timestamp),
+            sanitizeCsv(PEMRAKARSA),
+            sanitizeCsv(KEGIATAN),
+            sanitizeCsv(NO_TELEPON),
+            sanitizeCsv(isAmdalMode ? 'YA (AMDALNET)' : 'TIDAK (BIASA)'),
+            sanitizeCsv(TAHUN),
+            sanitizeCsv(PROVINSI),
+            sanitizeCsv(KOTA),
+            sanitizeCsv(KECAMATAN),
+            sanitizeCsv(ALAMAT),
+            sanitizeCsv(KETERANGAN),
+            sanitizeCsv(exportType)
+        ].join(',') + '\n';
+
+        fs.appendFileSync(csvPath, row, 'utf8');
+
+        // Optional Google Sheet Webhook Sync
+        if (process.env.GOOGLE_SHEET_WEBHOOK_URL) {
+            fetch(process.env.GOOGLE_SHEET_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(req.body)
+            }).catch(e => console.warn('Google Sheet webhook sync failed:', e.message));
+        }
+
+        console.log('[SPREADSHEET_LOG] Submission recorded:', { PEMRAKARSA, KEGIATAN, NO_TELEPON });
+        res.json({ success: true, message: 'Data berhasil disimpan di spreadsheet.' });
+    } catch (err) {
+        console.error('[SPREADSHEET_LOG_ERROR]', err);
+        res.status(500).json({ error: 'Failed to record spreadsheet submission' });
+    }
+});
+
+// Download Submissions Spreadsheet CSV (Protected: Admin Only)
+router.get('/submissions-csv', verifyAdmin, (req, res) => {
+    const csvPath = path.join(__dirname, '../uploads/data_pemohon_spreadsheet.csv');
+    if (!fs.existsSync(csvPath)) {
+        return res.status(404).send('Belum ada data spreadsheet yang tersimpan.');
+    }
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=Data_Pemohon_Polygon.csv');
+    res.sendFile(csvPath);
 });
 
 router.get('/proxy-tile', async (req, res) => {

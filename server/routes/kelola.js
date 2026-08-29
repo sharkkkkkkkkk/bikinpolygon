@@ -34,52 +34,7 @@ const logAdminActivity = (req, action, details = {}) => {
     }
 };
 
-// Middleware verifikasi admin yang lebih ketat
-const verifyAdmin = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        logAdminActivity(req, 'UNAUTHORIZED_ACCESS', { reason: 'No token provided' });
-        return res.status(401).json({ error: 'Token tidak ditemukan' });
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    // Cek apakah token ada di blacklist
-    if (tokenBlacklist.has(token)) {
-        logAdminActivity(req, 'BLACKLISTED_TOKEN', { reason: 'Token has been invalidated' });
-        return res.status(403).json({ error: 'Sesi telah berakhir, silakan login kembali' });
-    }
-
-    // Verifikasi token
-    jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, decoded) => {
-        if (err) {
-            const errorType = err.name === 'TokenExpiredError' ? 'EXPIRED_TOKEN' : 'INVALID_TOKEN';
-            logAdminActivity(req, errorType, { error: err.message });
-            return res.status(403).json({ error: 'Token tidak valid atau sudah kadaluarsa' });
-        }
-
-        // Verifikasi role admin
-        if (decoded.role !== 'admin') {
-            logAdminActivity(req, 'FORBIDDEN_ACCESS', {
-                userId: decoded.id,
-                role: decoded.role,
-                reason: 'Non-admin trying to access kelola'
-            });
-            return res.status(403).json({ error: 'Akses ditolak. Anda bukan administrator.' });
-        }
-
-        // Cek apakah token terlalu tua (re-auth setelah 12 jam)
-        const tokenAge = Date.now() / 1000 - decoded.iat;
-        if (tokenAge > 12 * 60 * 60) { // 12 jam
-            logAdminActivity(req, 'SESSION_TOO_OLD', { tokenAge: tokenAge / 3600 });
-            return res.status(403).json({ error: 'Sesi terlalu lama, silakan login kembali' });
-        }
-
-        req.user = decoded;
-        next();
-    });
-};
+const { verifyAdmin, getJwtSecret } = require('../middleware/authMiddleware');
 
 // Middleware validasi input
 const validateInput = (requiredFields) => (req, res, next) => {
@@ -115,8 +70,15 @@ router.post('/generate-aeo', async (req, res) => {
             return res.status(400).json({ error: 'Keyword is required' });
         }
 
-        const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCDVf2Lj5EcQYM87_QblrEgSls37QQ5Ycw';
-        const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || 'ZhHtuoMi8spJDZqK065lNXMIg85niCHZ';
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+        const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
+
+        if (provider === 'mistral' && !MISTRAL_API_KEY) {
+            return res.status(500).json({ error: 'MISTRAL_API_KEY environment variable is not configured.' });
+        }
+        if (provider === 'gemini' && !GEMINI_API_KEY) {
+            return res.status(500).json({ error: 'GEMINI_API_KEY environment variable is not configured.' });
+        }
         
         const systemPrompt = `Anda adalah mesin penghasil data AEO spesialis. Tugas Anda adalah membuat data SEO dan skema FAQ JSON-LD untuk platform pembuat peta (polygon shapefile) OSS RBA otomatis.
 
@@ -205,10 +167,17 @@ router.post('/generate-blog', async (req, res) => {
             return res.status(400).json({ error: 'Keyword is required' });
         }
 
-        const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCDVf2Lj5EcQYM87_QblrEgSls37QQ5Ycw';
-        const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || 'ZhHtuoMi8spJDZqK065lNXMIg85niCHZ';
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+        const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
+
+        if (provider === 'mistral' && !MISTRAL_API_KEY) {
+            return res.status(500).json({ error: 'MISTRAL_API_KEY environment variable is not configured.' });
+        }
+        if (provider === 'gemini' && !GEMINI_API_KEY) {
+            return res.status(500).json({ error: 'GEMINI_API_KEY environment variable is not configured.' });
+        }
         
-        const systemPrompt = `Anda adalah Senior SEO Specialist & Geospatial Engineer yang ahli dalam sistem OSS RBA Indonesia. Tugas Anda adalah menulis artikel teknis berkualitas tinggi untuk blog 'LineSima'.
+        const systemPrompt = `Anda adalah Senior SEO Specialist & Geospatial Engineer yang ahli dalam sistem OSS RBA Indonesia. Tugas Anda adalah menulis artikel teknis berkualitas tinggi untuk blog 'BikinPolygon'.
 Target Keyword Topik: ${keyword}
 
 Hasilkan output HANYA dalam format JSON valid tanpa markdown code block (tanpa \`\`\`json ... \`\`\`), dengan struktur berikut:
@@ -216,9 +185,9 @@ Hasilkan output HANYA dalam format JSON valid tanpa markdown code block (tanpa \
   "title": "Judul Artikel (Clickbait edukatif, memuat keyword)",
   "slug": "url-slug-kebab-case",
   "excerpt": "Ringkasan artikel 1-2 kalimat (max 155 karakter) untuk meta description",
-  "author": "LineSima Expert",
+  "author": "BikinPolygon Expert",
   "keywords": "keyword1, keyword2, keyword3",
-  "content": "Isi artikel lengkap berformat Markdown. Gunakan heading H2/H3, list, dan bold untuk penekanan. Pastikan artikel menjawab masalah target secara detail namun tetap mempromosikan LineSima sebagai solusi mudah untuk membuat polygon shapefile."
+  "content": "Isi artikel lengkap berformat Markdown. Gunakan heading H2/H3, list, dan bold untuk penekanan. Pastikan artikel menjawab masalah target secara detail namun tetap mempromosikan BikinPolygon sebagai solusi mudah untuk membuat polygon shapefile."
 }`;
 
         let aiTextResponse = '';
@@ -282,23 +251,41 @@ Hasilkan output HANYA dalam format JSON valid tanpa markdown code block (tanpa \
     }
 });
 
-// Get all users
+// Get users with optional pagination
 router.get('/users', async (req, res) => {
-    logAdminActivity(req, 'VIEW_USERS', { action: 'List all users' });
+    logAdminActivity(req, 'VIEW_USERS', { action: 'List users' });
 
     try {
-        const { data: users, error } = await req.supabase
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const offset = (page - 1) * limit;
+
+        const { data: users, count, error } = await req.supabase
             .from('users')
-            .select('id, email, name, whatsapp, role, token_balance, created_at')
-            .order('created_at', { ascending: false });
+            .select('id, email, name, whatsapp, role, token_balance, access_until, created_at', { count: 'exact' })
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
 
         if (error) {
             logAdminActivity(req, 'VIEW_USERS_ERROR', { error: error.message });
             return res.status(500).json({ error: error.message });
         }
 
-        logAdminActivity(req, 'VIEW_USERS_SUCCESS', { userCount: users.length });
-        res.json(users);
+        logAdminActivity(req, 'VIEW_USERS_SUCCESS', { userCount: users ? users.length : 0 });
+        
+        if (req.query.page || req.query.limit) {
+            return res.json({
+                users: users || [],
+                pagination: {
+                    total: count || 0,
+                    page,
+                    limit,
+                    totalPages: Math.ceil((count || 0) / limit)
+                }
+            });
+        }
+
+        res.json(users || []);
     } catch (err) {
         logAdminActivity(req, 'VIEW_USERS_ERROR', { error: err.message });
         res.status(500).json({ error: 'Terjadi kesalahan saat mengambil data pengguna' });
@@ -316,13 +303,14 @@ router.get('/logs', async (req, res) => {
 
 // Create User manually
 router.post('/users', validateInput(['email', 'password']), async (req, res) => {
-    const { email, password, name, whatsapp, initialTokens } = req.body;
+    const { email, password, name, whatsapp, initialTokens, role } = req.body;
     const supabase = req.supabase;
 
     // Sanitasi input
     const sanitizedEmail = sanitizeInput(email)?.toLowerCase();
     const sanitizedName = sanitizeInput(name);
     const sanitizedWhatsapp = sanitizeInput(whatsapp);
+    const validRole = (role === 'admin' || role === 'user') ? role : 'user';
 
     // Validasi format email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -337,7 +325,8 @@ router.post('/users', validateInput(['email', 'password']), async (req, res) => 
 
     logAdminActivity(req, 'CREATE_USER', {
         email: sanitizedEmail,
-        name: sanitizedName
+        name: sanitizedName,
+        role: validRole
     });
 
     try {
@@ -364,7 +353,7 @@ router.post('/users', validateInput(['email', 'password']), async (req, res) => 
             name: sanitizedName || '',
             whatsapp: sanitizedWhatsapp || '',
             token_balance: parseInt(initialTokens) || 0,
-            role: 'user'
+            role: validRole
         }]).select('id, email, name, whatsapp, role, token_balance, created_at');
 
         if (error) {
@@ -461,10 +450,10 @@ router.put('/users/:id/tokens', validateInput(['amount']), async (req, res) => {
     }
 });
 
-// Update user details (Name, WhatsApp, Role, Password)
+// Update user details (Name, WhatsApp, Role, Password, Token Balance, Access Until)
 router.put('/users/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, whatsapp, role, email, password } = req.body;
+    const { name, whatsapp, role, email, password, token_balance, access_until } = req.body;
 
     // Validasi ID format (UUID)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -479,6 +468,9 @@ router.put('/users/:id', async (req, res) => {
         if (name !== undefined) updateData.name = sanitizeInput(name);
         if (whatsapp !== undefined) updateData.whatsapp = sanitizeInput(whatsapp);
         if (email !== undefined) updateData.email = sanitizeInput(email)?.toLowerCase();
+        if (role !== undefined && (role === 'admin' || role === 'user')) updateData.role = role;
+        if (token_balance !== undefined) updateData.token_balance = Math.max(0, parseInt(token_balance) || 0);
+        if (access_until !== undefined) updateData.access_until = access_until;
         
         // Handle password update
         if (password && password.length > 0) {
@@ -493,7 +485,7 @@ router.put('/users/:id', async (req, res) => {
             .from('users')
             .update(updateData)
             .eq('id', id)
-            .select('id, email, name, whatsapp, role, token_balance, created_at');
+            .select('id, email, name, whatsapp, role, token_balance, access_until, created_at');
 
         if (error) throw error;
         if (!data || data.length === 0) {
@@ -505,6 +497,55 @@ router.put('/users/:id', async (req, res) => {
     } catch (err) {
         logAdminActivity(req, 'UPDATE_USER_ERROR', { error: err.message });
         res.status(500).json({ error: 'Gagal memperbarui data pengguna' });
+    }
+});
+
+// Manage User Duration Pass Access (Akses Harian 1 Hari/24 Jam, Mingguan 7 Hari, Bulanan 28 Hari)
+router.put('/users/:id/duration-pass', async (req, res) => {
+    const { id } = req.params;
+    const { days } = req.body; // days can be 1 (24 Hours), 7 (7 Days), 28 (28 Days), or 0 (Expire Now)
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+        return res.status(400).json({ error: 'Format ID pengguna tidak valid' });
+    }
+
+    try {
+        const { data: user, error: fetchErr } = await req.supabase
+            .from('users')
+            .select('id, access_until')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !user) {
+            return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+        }
+
+        let newAccessUntil;
+        if (days === 0 || days === 'expire') {
+            newAccessUntil = new Date().toISOString(); // Expires immediately
+        } else {
+            const currentExp = user.access_until && new Date(user.access_until) > new Date()
+                ? new Date(user.access_until)
+                : new Date();
+            const daysToAdd = parseInt(days) || 1;
+            currentExp.setTime(currentExp.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
+            newAccessUntil = currentExp.toISOString();
+        }
+
+        const { data, error } = await req.supabase
+            .from('users')
+            .update({ access_until: newAccessUntil })
+            .eq('id', id)
+            .select('id, email, name, whatsapp, role, token_balance, access_until, created_at');
+
+        if (error) throw error;
+
+        logAdminActivity(req, 'GRANT_DURATION_PASS', { userId: id, days, newAccessUntil });
+        res.json({ message: `Masa akses durasi berhasil diperbarui s.d ${newAccessUntil}`, user: data[0] });
+    } catch (err) {
+        logAdminActivity(req, 'GRANT_DURATION_PASS_ERROR', { userId: id, error: err.message });
+        res.status(500).json({ error: err.message || 'Gagal memperbarui masa akses durasi' });
     }
 });
 

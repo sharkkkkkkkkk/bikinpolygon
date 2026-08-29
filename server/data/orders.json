@@ -1,0 +1,176 @@
+{
+  "BP-1787993726408-1317": {
+    "orderId": "BP-1787993726408-1317",
+    "amount": 27000,
+    "deviceId": "DEV-3ueqq634l2gmtd84kxj",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "completed",
+    "createdAt": "2026-08-29T08:55:26.408Z"
+  },
+  "BP-1787993915796-6830": {
+    "orderId": "BP-1787993915796-6830",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "completed",
+    "createdAt": "2026-08-29T08:58:35.796Z"
+  },
+  "BP-1787994124678-5113": {
+    "orderId": "BP-1787994124678-5113",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T09:02:04.679Z"
+  },
+  "BP-1787999291381-9300": {
+    "orderId": "BP-1787999291381-9300",
+    "amount": 97000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Mingguan (7 Hari)",
+    "days": 7,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:28:11.381Z"
+  },
+  "BP-1787999372794-4842": {
+    "orderId": "BP-1787999372794-4842",
+    "amount": 247000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Bulanan (28 Hari)",
+    "days": 28,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:29:32.794Z"
+  },
+  "BP-1787999400632-5030": {
+    "orderId": "BP-1787999400632-5030",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:30:00.632Z"
+  },
+  "BP-1787999466229-8748": {
+    "orderId": "BP-1787999466229-8748",
+    "amount": 97000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Mingguan (7 Hari)",
+    "days": 7,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:31:06.229Z"
+  },
+  "BP-1787999638813-9565": {
+    "orderId": "BP-1787999638813-9565",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:33:58.813Z"
+  },
+  "BP-1787999855894-2707": {
+    "orderId": "BP-1787999855894-2707",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:37:35.894Z"
+  },
+  "BP-1787999928319-8324": {
+    "orderId": "BP-1787999928319-8324",
+    "amount": 97000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Mingguan (7 Hari)",
+    "days": 7,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:38:48.319Z"
+  },
+  "BP-1787999999084-7551": {
+    "orderId": "BP-1787999999084-7551",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:39:59.085Z"
+  },
+  "BP-1788000146765-4294": {
+    "orderId": "BP-1788000146765-4294",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:42:26.765Z"
+  },
+  "BP-1788000286578-3218": {
+    "orderId": "BP-1788000286578-3218",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:44:46.578Z"
+  },
+  "BP-1788000455366-2981": {
+    "orderId": "BP-1788000455366-2981",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:47:35.366Z"
+  },
+  "BP-1788000808479-2778": {
+    "orderId": "BP-1788000808479-2778",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:53:28.479Z"
+  },
+  "BP-1788000923690-1116": {
+    "orderId": "BP-1788000923690-1116",
+    "amount": 27000,
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T10:55:23.690Z"
+  },
+  "BP-1788001308198-7185": {
+    "orderId": "BP-1788001308198-7185",
+    "amount": 27000,
+    "totalPayment": 27499,
+    "fee": 499,
+    "paymentNumber": "THIS.IS.JUST.AN.EXAMPLE.FOR.SANDBOX.00020101021226610016ID.CO.SHOPEE.WWW01189360091800216005230208216005230303UME51440014ID.CO.QRIS.WWW.11111",
+    "expiredAt": "2026-08-29T12:01:50.171066725Z",
+    "deviceId": "test-device-123",
+    "userId": null,
+    "email": null,
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T11:01:49.062Z"
+  },
+  "BP-1788001312862-6073": {
+    "orderId": "BP-1788001312862-6073",
+    "amount": 27000,
+    "totalPayment": 27499,
+    "fee": 499,
+    "paymentNumber": "THIS.IS.JUST.AN.EXAMPLE.FOR.SANDBOX.00020101021226610016ID.CO.SHOPEE.WWW01189360091800216005230208216005230303UME51440014ID.CO.QRIS.WWW.11111",
+    "expiredAt": "2026-08-29T12:01:54.335759562Z",
+    "deviceId": "DEV-lfx14xkoowimte5dnzw",
+    "userId": "de782852-a5cd-4195-81fa-322154b8b8e1",
+    "email": null,
+    "planName": "Akses Harian (1 Hari)",
+    "days": 1,
+    "status": "pending",
+    "createdAt": "2026-08-29T11:01:53.373Z"
+  }
+}

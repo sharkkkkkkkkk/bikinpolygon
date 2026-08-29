@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
+const { verifyAdmin } = require('../middleware/authMiddleware');
 
 // We use req.supabase attached from server.js for DB operations.
 
-// Get all AEO scenarios
+// Get all AEO scenarios (Read-only)
 router.get('/', async (req, res) => {
     const { data, error } = await req.supabase
         .from('aeo_oss_scenarios')
@@ -19,9 +19,13 @@ router.get('/', async (req, res) => {
     res.json(data);
 });
 
-// Add new AEO scenario
-router.post('/', async (req, res) => {
+// Add new AEO scenario (Protected: Admin Only)
+router.post('/', verifyAdmin, async (req, res) => {
     const { target_problem, solution_text, schema_type } = req.body;
+    if (!target_problem || !solution_text) {
+        return res.status(400).json({ error: 'Target problem dan solution text wajib diisi.' });
+    }
+
     const { data, error } = await req.supabase
         .from('aeo_oss_scenarios')
         .insert([{ target_problem, solution_text, schema_type }])
@@ -31,8 +35,8 @@ router.post('/', async (req, res) => {
     res.json(data[0]);
 });
 
-// Toggle is_active status
-router.patch('/:id/toggle', async (req, res) => {
+// Toggle is_active status (Protected: Admin Only)
+router.patch('/:id/toggle', verifyAdmin, async (req, res) => {
     const { id } = req.params;
     const { is_active } = req.body;
     const { data, error } = await req.supabase

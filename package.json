@@ -1,14 +1,23 @@
 {
-    "name": "polygon-monorepo",
+    "name": "bikinpolygon-monorepo",
     "version": "1.0.0",
     "private": true,
     "engines": {
         "node": ">=18.0.0"
     },
     "workspaces": [
-        "client",
+        "landing-page",
+        "web-app",
         "server"
     ],
+    "scripts": {
+        "dev": "node start-dev.js",
+        "dev:landing": "npm --prefix landing-page run dev",
+        "dev:app": "npm --prefix web-app run dev",
+        "dev:server": "npm --prefix server run dev",
+        "build:landing": "npm --prefix landing-page run build",
+        "build:app": "npm --prefix web-app run build"
+    },
     "devDependencies": {
         "@supabase/supabase-js": "^2.91.0",
         "dotenv": "^17.2.3"

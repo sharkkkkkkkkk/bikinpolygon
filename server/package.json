@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
+    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,6 +13,7 @@
   "description": "",
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",
+    "@turf/turf": "^7.4.0",
     "archiver": "^7.0.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
