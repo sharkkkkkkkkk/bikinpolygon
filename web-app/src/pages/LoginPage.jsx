@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Zap, ArrowLeft } from 'lucide-react';
 
-const MARKETING_URL = import.meta.env.VITE_MARKETING_URL || 'http://localhost:5173';
+const MARKETING_URL = import.meta.env.VITE_MARKETING_URL || 'https://bikinpolygon.xyz';
 
 export default function LoginPage() {
     const { login, loginWithGoogle } = useAuth();

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, ArrowUpRight, ShieldCheck, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5174';
+const APP_URL = import.meta.env.VITE_APP_URL || 'https://app.bikinpolygon.xyz';
 
 export default function LandingNavbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);

@@ -651,7 +651,7 @@ export default function Dashboard() {
                     </div>
 
                     <nav className="hidden lg:flex items-center gap-4 text-xs font-medium text-slate-400 ml-4 border-l border-zinc-800 pl-4">
-                        <a href={import.meta.env.VITE_MARKETING_URL || 'http://localhost:5173'} className="hover:text-[#ADFA1D] transition-colors flex items-center gap-1">
+                        <a href={import.meta.env.VITE_MARKETING_URL || 'https://bikinpolygon.xyz'} className="hover:text-[#ADFA1D] transition-colors flex items-center gap-1">
                             <ArrowLeft className="w-3.5 h-3.5" /> Landing Page
                         </a>
                         <span className="text-white font-bold bg-zinc-800 px-3 py-1 rounded-full text-[11px]">GIS Workspace</span>

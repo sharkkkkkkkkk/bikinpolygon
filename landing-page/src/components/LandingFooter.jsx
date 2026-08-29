@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUpRight, ShieldCheck, Zap, Globe, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5174';
+const APP_URL = import.meta.env.VITE_APP_URL || 'https://app.bikinpolygon.xyz';
 
 export default function LandingFooter() {
     return (

@@ -5,7 +5,7 @@ import LandingNavbar from '../components/LandingNavbar';
 import LandingFooter from '../components/LandingFooter';
 import SEOHead from '../seo/SEOHead';
 
-const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5174';
+const APP_URL = import.meta.env.VITE_APP_URL || 'https://app.bikinpolygon.xyz';
 
 const Reveal = ({ children, delay = 0, className = "" }) => {
     const [isVisible, setIsVisible] = useState(false);

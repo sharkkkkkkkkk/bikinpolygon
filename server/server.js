@@ -36,7 +36,7 @@ const corsOptions = {
         if (!origin) return callback(null, true);
         const allowedOrigins = process.env.ALLOWED_ORIGINS
             ? process.env.ALLOWED_ORIGINS.split(',')
-            : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'];
+            : ['https://bikinpolygon.xyz', 'https://www.bikinpolygon.xyz', 'https://app.bikinpolygon.xyz', 'https://api.bikinpolygon.xyz', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'];
 
         if (allowedOrigins.includes(origin) ||
             origin.endsWith('.vercel.app') ||
