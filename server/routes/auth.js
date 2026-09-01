@@ -111,7 +111,7 @@ router.post('/google-sync', async (req, res) => {
         }
 
         const token = jwt.sign({ id: user.id, role: user.role }, getJwtSecret(), { expiresIn: '1d' });
-        res.json({ token, user: { id: user.id, email: user.email, role: user.role, name: user.name } });
+        res.json({ token, user: { id: user.id, email: user.email, role: user.role, name: user.name, token_balance: user.token_balance || 0, access_until: user.access_until || null } });
     } catch (err) {
         console.error("Google Sync Error:", err);
         res.status(500).json({ error: err.message });

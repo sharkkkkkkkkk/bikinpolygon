@@ -152,11 +152,11 @@ app.use((req, res, next) => {
 // =====================================
 // SUPABASE INIT
 // =====================================
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-    console.error("Missing SUPABASE_URL or SUPABASE_KEY in .env");
+    console.error("Missing SUPABASE_URL or SUPABASE_KEY in environment variables");
 }
 
 const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
@@ -207,7 +207,7 @@ app.use((err, req, res, next) => {
 });
 
 // Conditional listen for local development
-if (process.env.NODE_ENV !== 'production' && require.main === module) {
+if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
