@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-const rawBaseURL = import.meta.env.VITE_API_URL || '';
-const baseURL = rawBaseURL
-    ? (rawBaseURL.endsWith('/api') ? rawBaseURL : `${rawBaseURL.replace(/\/$/, '')}/api`)
-    : '/api';
+const rawBaseURL = import.meta.env.VITE_API_URL || 'https://api.bikinpolygon.xyz';
+const baseURL = rawBaseURL.endsWith('/api') ? rawBaseURL : `${rawBaseURL.replace(/\/$/, '')}/api`;
 
 const api = axios.create({
     baseURL,
