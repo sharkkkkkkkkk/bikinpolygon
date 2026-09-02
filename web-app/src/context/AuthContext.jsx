@@ -73,19 +73,22 @@ export const AuthProvider = ({ children }) => {
             const refreshToken = hashParams.get('refresh_token');
 
             if (accessToken) {
-                // Decode JWT payload (middle segment) to get email
                 try {
-                    const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                    const base64Url = accessToken.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const pad = base64.length % 4;
+                    const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+                    const payload = JSON.parse(atob(padded));
                     const email = payload.email;
                     const name = payload.user_metadata?.full_name || payload.user_metadata?.name || '';
 
                     console.log('[AUTH] Extracted email from token:', email);
 
                     if (email) {
-                        // Clean URL immediately — we already extracted what we need
+                        // Clean URL immediately
                         window.history.replaceState(null, '', window.location.pathname);
 
-                        // Also set session in Supabase client if available
+                        // Set session in Supabase client if available
                         if (supabase && supabase.auth && refreshToken) {
                             supabase.auth.setSession({
                                 access_token: accessToken,
@@ -98,7 +101,6 @@ export const AuthProvider = ({ children }) => {
                     }
                 } catch (decodeErr) {
                     console.error('[AUTH] Failed to decode access_token:', decodeErr);
-                    // Fallback: clean URL anyway
                     window.history.replaceState(null, '', window.location.pathname);
                 }
             }
