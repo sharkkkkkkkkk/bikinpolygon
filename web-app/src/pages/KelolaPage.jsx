@@ -86,7 +86,7 @@ export default function Kelola() {
             console.warn('[KELOLA] API /kelola/users failed, trying direct Supabase fallback:', error);
             try {
                 const { data: dbUsers, error: dbError } = await supabase
-                    .from('users')
+                    .from('bikinpolygon_users')
                     .select('id, email, name, whatsapp, role, token_balance, access_until, created_at')
                     .order('created_at', { ascending: false });
 

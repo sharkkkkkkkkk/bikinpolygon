@@ -261,7 +261,7 @@ router.get('/users', async (req, res) => {
         const offset = (page - 1) * limit;
 
         const { data: users, count, error } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .select('id, email, name, whatsapp, role, token_balance, access_until, created_at', { count: 'exact' })
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
@@ -332,7 +332,7 @@ router.post('/users', validateInput(['email', 'password']), async (req, res) => 
     try {
         // Cek apakah email sudah ada
         const { data: existingUser } = await supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .select('id')
             .eq('email', sanitizedEmail)
             .single();
@@ -347,7 +347,7 @@ router.post('/users', validateInput(['email', 'password']), async (req, res) => 
 
         const hashedPassword = await bcrypt.hash(password, 12); // Tingkatkan rounds
 
-        const { data, error } = await supabase.from('users').insert([{
+        const { data, error } = await supabase.from('bikinpolygon_users').insert([{
             email: sanitizedEmail,
             password_hash: hashedPassword,
             name: sanitizedName || '',
@@ -394,7 +394,7 @@ router.put('/users/:id/tokens', validateInput(['amount']), async (req, res) => {
 
     try {
         const { data: user, error: fetchError } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .select('id, email, token_balance')
             .eq('id', id)
             .single();
@@ -424,7 +424,7 @@ router.put('/users/:id/tokens', validateInput(['amount']), async (req, res) => {
         }
 
         const { error } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .update({ token_balance: newBalance })
             .eq('id', id);
 
@@ -482,7 +482,7 @@ router.put('/users/:id', async (req, res) => {
         }
 
         const { data, error } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .update(updateData)
             .eq('id', id)
             .select('id, email, name, whatsapp, role, token_balance, access_until, created_at');
@@ -512,7 +512,7 @@ router.put('/users/:id/duration-pass', async (req, res) => {
 
     try {
         const { data: user, error: fetchErr } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .select('id, access_until')
             .eq('id', id)
             .single();
@@ -534,7 +534,7 @@ router.put('/users/:id/duration-pass', async (req, res) => {
         }
 
         const { data, error } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .update({ access_until: newAccessUntil })
             .eq('id', id)
             .select('id, email, name, whatsapp, role, token_balance, access_until, created_at');
@@ -568,7 +568,7 @@ router.delete('/users/:id', async (req, res) => {
     try {
         // Cek apakah user ada
         const { data: user, error: fetchError } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .select('id, email, role')
             .eq('id', id)
             .single();
@@ -587,7 +587,7 @@ router.delete('/users/:id', async (req, res) => {
         }
 
         const { error } = await req.supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .delete()
             .eq('id', id);
 

@@ -79,7 +79,7 @@ const PRICING_PLANS = {
 async function grantUserDurationAccessInDB(supabase, userId, userEmail, days) {
     if (!supabase || (!userId && !userEmail)) return false;
     try {
-        let query = supabase.from('users').select('id, email, access_until');
+        let query = supabase.from('bikinpolygon_users').select('id, email, access_until');
         if (userId) {
             query = query.eq('id', userId);
         } else if (userEmail) {
@@ -99,7 +99,7 @@ async function grantUserDurationAccessInDB(supabase, userId, userEmail, days) {
         const newAccessUntilStr = newExpDate.toISOString();
 
         const { error: updateErr } = await supabase
-            .from('users')
+            .from('bikinpolygon_users')
             .update({ access_until: newAccessUntilStr })
             .eq('id', dbUser.id);
 
@@ -346,7 +346,7 @@ router.post('/claim-order', async (req, res) => {
         if (isVerified) {
             // Fetch updated user from DB
             const { data: updatedUser } = await req.supabase
-                .from('users')
+                .from('bikinpolygon_users')
                 .select('id, email, name, role, access_until, token_balance')
                 .eq('id', targetUserId)
                 .single();

@@ -37,7 +37,7 @@ const verifyAdmin = (req, res, next) => {
         try {
             if (req.supabase && decoded.id) {
                 const { data: dbUser } = await req.supabase
-                    .from('users')
+                    .from('bikinpolygon_users')
                     .select('id, email, role, name')
                     .eq('id', decoded.id)
                     .single();

@@ -37,7 +37,7 @@ async function authorizeExportService(supabase, userId, { exportType = 'OSS_SHP'
 
   // Fetch user details from Supabase
   const { data: user, error: dbError } = await supabase
-    .from('users')
+    .from('bikinpolygon_users')
     .select('id, role, token_balance, access_until')
     .eq('id', userId)
     .single();
@@ -78,7 +78,7 @@ async function authorizeExportService(supabase, userId, { exportType = 'OSS_SHP'
   if (hasTokenBalance) {
     // Deduct 1 token for per-creation access if not on active duration pass
     await supabase
-      .from('users')
+      .from('bikinpolygon_users')
       .update({ token_balance: Math.max(0, user.token_balance - 1) })
       .eq('id', userId);
 
