@@ -77,13 +77,31 @@ export default function Kelola() {
     };
 
     const fetchUsers = async () => {
+        setLoading(true);
         try {
             const res = await api.get('/kelola/users');
-            setUsers(Array.isArray(res.data) ? res.data : (res.data?.users || []));
-            setLoading(false);
+            const data = Array.isArray(res.data) ? res.data : (res.data?.users || []);
+            setUsers(data);
         } catch (error) {
-            console.error(error);
-            toast({ title: "Error", description: "Failed to fetch users", variant: "destructive" });
+            console.warn('[KELOLA] API /kelola/users failed, trying direct Supabase fallback:', error);
+            try {
+                const { data: dbUsers, error: dbError } = await supabase
+                    .from('users')
+                    .select('id, email, name, whatsapp, role, token_balance, access_until, created_at')
+                    .order('created_at', { ascending: false });
+
+                if (!dbError && dbUsers) {
+                    setUsers(dbUsers);
+                } else {
+                    console.error('[KELOLA] Supabase fallback error:', dbError);
+                    toast({ title: "Gagal Memuat Data", description: error.response?.data?.error || "Gagal memuat data pengguna dari server.", variant: "destructive" });
+                }
+            } catch (fallbackErr) {
+                console.error('[KELOLA] Direct fetch error:', fallbackErr);
+                toast({ title: "Gagal Memuat Data", description: "Periksa koneksi atau kredensial akun administrator Anda.", variant: "destructive" });
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
