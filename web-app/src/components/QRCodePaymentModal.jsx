@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck, Flame, Check, ArrowRight, Loader2, Sparkles, QrCode, Copy, RefreshCw, MessageSquare, CheckCircle2 } from 'lucide-react';
-import { createPaymentOrder, checkAccessStatus, claimPaymentOrder } from '../lib/deviceAccess';
+import { createPaymentOrder, checkAccessStatus } from '../lib/deviceAccess';
 import { useAuth } from '@/context/AuthContext';
 
 export default function QRCodePaymentModal({ isOpen, onClose }) {
@@ -13,44 +13,6 @@ export default function QRCodePaymentModal({ isOpen, onClose }) {
     const [orderData, setOrderData] = useState(null);
     const [copied, setCopied] = useState(false);
     const [timeLeft, setTimeLeft] = useState(900); // 15 Minutes timer
-    const [claimOrderId, setClaimOrderId] = useState('');
-    const [claimLoading, setClaimLoading] = useState(false);
-    const [claimStatus, setClaimStatus] = useState(null);
-
-    const handleClaimOrder = async () => {
-        if (!claimOrderId.trim()) return;
-        if (!user) {
-            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
-            return;
-        }
-
-        setClaimLoading(true);
-        setClaimStatus(null);
-        try {
-            const res = await claimPaymentOrder(claimOrderId.trim());
-            if (res?.success) {
-                setClaimStatus({
-                    type: 'success',
-                    message: res.message || 'Pembayaran berhasil diverifikasi! Hak akses paket telah diaktifkan ke akun Anda.'
-                });
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            } else {
-                setClaimStatus({
-                    type: 'error',
-                    message: res?.error || 'Order ID tidak ditemukan atau pembayaran belum terkonfirmasi di Pakasir.'
-                });
-            }
-        } catch (err) {
-            setClaimStatus({
-                type: 'error',
-                message: err.response?.data?.error || 'Gagal memverifikasi Order ID. Silakan pastikan Order ID sudah benar.'
-            });
-        } finally {
-            setClaimLoading(false);
-        }
-    };
 
     const plans = [
         {
@@ -254,41 +216,7 @@ export default function QRCodePaymentModal({ isOpen, onClose }) {
                                 )}
                             </Button>
 
-                            {/* Claim Order ID Section */}
-                            <div className="pt-3 border-t border-slate-200/80 mt-3 space-y-2">
-                                <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
-                                    <span>Sudah Transfer / Punya Order ID?</span>
-                                    <span className="text-blue-600 font-extrabold text-[10px]">VERIFIKASI ANGKAT</span>
-                                </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Contoh: BP-1787994124678-5113"
-                                        value={claimOrderId}
-                                        onChange={(e) => setClaimOrderId(e.target.value)}
-                                        className="flex-1 text-xs px-3 py-2 border border-slate-300 rounded-xl font-mono focus:outline-none focus:border-blue-600 bg-slate-50 text-slate-900"
-                                    />
-                                    <Button
-                                        size="sm"
-                                        onClick={handleClaimOrder}
-                                        disabled={claimLoading || !claimOrderId.trim()}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 rounded-xl shrink-0"
-                                    >
-                                        {claimLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Klaim'}
-                                    </Button>
-                                </div>
-                                {claimStatus && (
-                                    <div className={`text-[11px] font-bold p-2.5 rounded-xl border ${
-                                        claimStatus.type === 'success'
-                                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                                            : 'bg-rose-50 text-rose-800 border-rose-300'
-                                    }`}>
-                                        {claimStatus.message}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 font-semibold text-center pt-1">
+                            <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 font-semibold text-center pt-2">
                                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                                 <span>Akses Otomatis Aktif Setelah Pembayaran Scan QRIS</span>
                             </div>
