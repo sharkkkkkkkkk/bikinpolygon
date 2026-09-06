@@ -84,11 +84,11 @@ const kelolaLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// Rate limiting ketat untuk login/auth (Anti Brute-Force)
+// Rate limiting untuk login/auth (Anti Brute-Force)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 menit
-    limit: 5, // max 5 percobaan login per 15 menit
-    message: { error: 'Terlalu banyak percobaan login. Coba lagi dalam 15 menit.' },
+    limit: 30, // max 30 percobaan login per 15 menit
+    message: { error: 'Terlalu banyak percobaan login. Coba lagi dalam beberapa menit.' },
     standardHeaders: 'draft-7',
     legacyHeaders: false,
 });
