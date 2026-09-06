@@ -574,10 +574,15 @@ export default function LandingPage() {
                             </div>
                         </Reveal>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {(posts.length > 0 ? posts : [
                                 {
-                                    title: "Cara Membuat Polygon OSS di HP",
+                                    title: "Kenapa Upload Polygon OSS Gagal? 5 Penyebab & Solusinya",
+                                    slug: "kenapa-upload-polygon-oss-gagal-dan-solusinya",
+                                    excerpt: "Panduan mengatasi gagal upload peta polygon KKPR di sistem OSS RBA BKPM, dari validasi CRS WGS84 hingga koreksi luas otomatis."
+                                },
+                                {
+                                    title: "Cara Membuat Polygon OSS di HP Android & iPhone",
                                     slug: "cara-membuat-polygon-oss-di-hp",
                                     excerpt: "Panduan praktis menggambar polygon lahan NIB OSS langsung dari smartphone Android atau iPhone Anda."
                                 },

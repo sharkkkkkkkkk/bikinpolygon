@@ -9,6 +9,60 @@ import LandingFooter from '../components/LandingFooter';
 import SEOHead from '../seo/SEOHead';
 
 const fallbackArticles = {
+    'kenapa-upload-polygon-oss-gagal-dan-solusinya': {
+        title: "Kenapa Upload Polygon OSS Gagal? 5 Penyebab & Solusinya",
+        excerpt: "Panduan mengatasi gagal upload peta polygon KKPR di sistem OSS RBA BKPM, dari validasi CRS WGS84 hingga koreksi luas otomatis.",
+        author: "Spesialis GIS BikinPolygon",
+        created_at: "2026-09-06T12:00:00Z",
+        content: `
+## 5 Penyebab Utama Upload Polygon OSS RBA Gagal & Cara Mengatasinya
+
+Bagi para pelaku usaha dan konsultan perizinan yang sedang mengurus **Kesesuaian Kegiatan Pemanfaatan Ruang (KKPR)** di portal **OSS RBA (oss.go.id)**, masalah *error* saat mengunggah file peta polygon (.ZIP) sering kali menjadi kendala yang menghambat terbitnya NIB.
+
+Berikut adalah 5 alasan utama kenapa file polygon OSS ditolak oleh sistem dan cara mengatasinya secara instan tanpa perlu software rumit:
+
+---
+
+### 1. Sistem Koordinat Bukan WGS84 (EPSG:4326)
+- **Penyebab:** Banyak file SHP hasil ekspor Google Earth atau software CAD menggunakan proyeksi planar (*Web Mercator / UTM*) tanpa file proyeksi \`.prj\` yang valid.
+- **Solusi:** Sistem OSS RBA mewajibkan sistem koordinat geografis **WGS84 (EPSG:4326)**. Di [BikinPolygon](https://bikinpolygon.xyz), seluruh polygon otomatis di-generate dengan proyeksi standar EPSG:4326 lengkap dengan berkas \`.prj\` resmi.
+
+---
+
+### 2. Berkas Komponen Shapefile Tidak Lengkap dalam ZIP
+- **Penyebab:** Mengunggah hanya file \`.shp\` saja ke dalam ZIP.
+- **Solusi:** Format Shapefile standar membutuhkan minimal **4 file wajib** dengan nama yang persis sama di dalam ZIP:
+  1. \`lahan_usaha.shp\` (Geometri spasial)
+  2. \`lahan_usaha.shx\` (Indeks geometri)
+  3. \`lahan_usaha.dbf\` (Tabel atribut)
+  4. \`lahan_usaha.prj\` (Informasi proyeksi koordinat)
+  
+  BikinPolygon otomatis mengemas keempat berkas ini dalam 1 file ZIP sekali klik.
+
+---
+
+### 3. Luas Polygon Tidak Cocok dengan Sertifikat Lahan
+- **Penyebab:** Luas digitasi manual di Google Earth sering selisih beberapa meter persegi dengan luas fisik di Sertifikat Tanah (SHM/HGB) karena kelengkungan bumi (*ellipsoid distorsi*).
+- **Solusi:** Gunakan fitur **Koreksi Luas Otomatis** di BikinPolygon. Masukkan angka sertifikat (misal: 500 m²), dan sistem akan mengkalibrasi skala polygon agar pas 100%.
+
+---
+
+### 4. Polygon Memiliki *Self-Intersection* (Garis Berpotongan)
+- **Penyebab:** Garis batas polygon saling menyilang atau tumpang tindih (*invalid topology*).
+- **Solusi:** Pastikan titik-titik digitasi berurutan searah jarum jam atau gunakan peta digitasi pintar BikinPolygon yang mencegah kesalahan topologi.
+
+---
+
+### 5. Kompresi Folder Bersarang (Nested Folder)
+- **Penyebab:** Mengompres satu folder utuh sehingga di dalam ZIP terdapat sub-folder \`folder/file.shp\`.
+- **Solusi:** Sistem OSS membaca berkas langsung di root ZIP. Pastikan file SHP berada langsung di tingkat pertama arsip ZIP.
+
+---
+
+### Kesimpulan & Cara Praktis:
+Tidak perlu lagi pusing menginstal QGIS atau mengonversi KML manual. Buka [BikinPolygon GIS Workspace](https://bikinpolygon.xyz), gambar lahan Anda di atas peta satelit ber-layer persil BPN, lalu unduh berkas ZIP SHP yang tervalidasi 100% lolos sistem OSS RBA!
+`
+    },
     'cara-membuat-polygon-oss-di-hp': {
         title: "Cara Membuat Polygon OSS di HP Android & iPhone",
         excerpt: "Panduan praktis menggambar polygon lahan NIB OSS RBA langsung dari smartphone Android atau iPhone Anda tanpa software GIS.",
