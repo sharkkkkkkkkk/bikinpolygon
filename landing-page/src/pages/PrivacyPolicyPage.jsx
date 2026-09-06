@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
             <SEOHead
                 title="Kebijakan Privasi (Privacy Policy) | BikinPolygon"
                 description="Kebijakan privasi BikinPolygon mengenai pengumpulan data, penggunaan Google OAuth, keamanan informasi pengguna, dan hak privasi data Anda."
-                canonicalUrl="https://bikinpolygon.xyz/privacy"
+                canonicalUrl="https://www.bikinpolygon.xyz/privacy"
             />
             <LandingNavbar />
 
@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
                                 1. Pendahuluan
                             </h2>
                             <p>
-                                Selamat datang di <strong>BikinPolygon</strong> ("kami", "aplikasi", atau "BikinPolygon GIS Workspace"). Kami berkomitmen untuk melindungi privasi dan keamanan data pribadi pengguna kami. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi Anda ketika Anda menggunakan situs web kami di <strong>https://bikinpolygon.xyz</strong> dan aplikasi web kami di <strong>https://app.bikinpolygon.xyz</strong>.
+                                Selamat datang di <strong>BikinPolygon</strong> ("kami", "aplikasi", atau "BikinPolygon GIS Workspace"). Kami berkomitmen untuk melindungi privasi dan keamanan data pribadi pengguna kami. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi Anda ketika Anda menggunakan situs web kami di <strong>https://www.bikinpolygon.xyz</strong> dan aplikasi web kami di <strong>https://app.bikinpolygon.xyz</strong>.
                             </p>
                         </section>
 
@@ -119,7 +119,7 @@ export default function PrivacyPolicyPage() {
                             </h2>
                             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-2 text-xs md:text-sm">
                                 <p><strong>Nama Aplikasi:</strong> BikinPolygon (BikinPolygon GIS Workspace)</p>
-                                <p><strong>Domain Resmi:</strong> https://bikinpolygon.xyz & https://app.bikinpolygon.xyz</p>
+                                <p><strong>Domain Resmi:</strong> https://www.bikinpolygon.xyz & https://app.bikinpolygon.xyz</p>
                                 <p><strong>Email Kontak Dukungan:</strong> support@bikinpolygon.xyz / admin@bikinpolygon.xyz</p>
                                 <p><strong>WhatsApp Customer Support:</strong> +62 889-8384-0979</p>
                                 <p><strong>Lokasi:</strong> Indonesia</p>

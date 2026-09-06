@@ -46,7 +46,7 @@ export default function PricingPage() {
             <SEOHead 
                 title="Harga Paket & Durasi Akses | BikinPolygon GIS Workspace" 
                 description="Informasi harga paket durasi akses harian, mingguan, dan bulanan pembuatan polygon NIB OSS RBA & AMDALNET KLHK presisi tinggi." 
-                canonicalUrl="https://bikinpolygon.xyz/harga"
+                canonicalUrl="https://www.bikinpolygon.xyz/harga"
             />
             <LandingNavbar />
 

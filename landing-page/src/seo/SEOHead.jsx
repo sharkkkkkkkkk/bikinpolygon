@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const SITE_URL = 'https://bikinpolygon.xyz';
+const SITE_URL = 'https://www.bikinpolygon.xyz';
 
 export default function SEOHead({ 
   title = "Buat Polygon NIB OSS & AMDALNET KLHK Online | BikinPolygon", 

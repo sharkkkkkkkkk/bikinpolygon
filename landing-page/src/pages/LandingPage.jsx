@@ -121,7 +121,7 @@ export default function LandingPage() {
             <SEOHead
                 title="BikinPolygon — Buat Peta Polygon OSS RBA & AMDALNET Online | Gratis & Tanpa GIS"
                 description="Generator Shapefile (SHP) Polygon Lahan NIB OSS RBA & Peta Tapak Proyek AMDALNET KLHK instan tanpa ArcGIS/QGIS. Presisi WGS84 & Web Mercator."
-                canonicalUrl="https://bikinpolygon.xyz/"
+                canonicalUrl="https://www.bikinpolygon.xyz/"
                 schemaData={faqSchema}
             />
             <LandingNavbar />

@@ -13,7 +13,7 @@ export default function TermsPage() {
             <SEOHead
                 title="Syarat dan Ketentuan Layanan (Terms of Service) | BikinPolygon"
                 description="Syarat dan ketentuan penggunaan layanan platform geospasial BikinPolygon untuk pembuatan Shapefile OSS & AMDALNET."
-                canonicalUrl="https://bikinpolygon.xyz/terms"
+                canonicalUrl="https://www.bikinpolygon.xyz/terms"
             />
             <LandingNavbar />
 
@@ -42,7 +42,7 @@ export default function TermsPage() {
                                 1. Penerimaan Ketentuan
                             </h2>
                             <p>
-                                Dengan mengakses atau menggunakan situs web <strong>https://bikinpolygon.xyz</strong> dan aplikasi <strong>https://app.bikinpolygon.xyz</strong>, Anda menyetujui untuk terikat oleh Syarat dan Ketentuan ini. Jika Anda tidak menyetujui salah satu ketentuan, Anda tidak diperkenankan menggunakan layanan kami.
+                                Dengan mengakses atau menggunakan situs web <strong>https://www.bikinpolygon.xyz</strong> dan aplikasi <strong>https://app.bikinpolygon.xyz</strong>, Anda menyetujui untuk terikat oleh Syarat dan Ketentuan ini. Jika Anda tidak menyetujui salah satu ketentuan, Anda tidak diperkenankan menggunakan layanan kami.
                             </p>
                         </section>
 

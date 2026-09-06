@@ -25,7 +25,7 @@ Berikut adalah 5 alasan utama kenapa file polygon OSS ditolak oleh sistem dan ca
 
 ### 1. Sistem Koordinat Bukan WGS84 (EPSG:4326)
 - **Penyebab:** Banyak file SHP hasil ekspor Google Earth atau software CAD menggunakan proyeksi planar (*Web Mercator / UTM*) tanpa file proyeksi \`.prj\` yang valid.
-- **Solusi:** Sistem OSS RBA mewajibkan sistem koordinat geografis **WGS84 (EPSG:4326)**. Di [BikinPolygon](https://bikinpolygon.xyz), seluruh polygon otomatis di-generate dengan proyeksi standar EPSG:4326 lengkap dengan berkas \`.prj\` resmi.
+- **Solusi:** Sistem OSS RBA mewajibkan sistem koordinat geografis **WGS84 (EPSG:4326)**. Di [BikinPolygon](https://www.bikinpolygon.xyz), seluruh polygon otomatis di-generate dengan proyeksi standar EPSG:4326 lengkap dengan berkas \`.prj\` resmi.
 
 ---
 
@@ -60,7 +60,7 @@ Berikut adalah 5 alasan utama kenapa file polygon OSS ditolak oleh sistem dan ca
 ---
 
 ### Kesimpulan & Cara Praktis:
-Tidak perlu lagi pusing menginstal QGIS atau mengonversi KML manual. Buka [BikinPolygon GIS Workspace](https://bikinpolygon.xyz), gambar lahan Anda di atas peta satelit ber-layer persil BPN, lalu unduh berkas ZIP SHP yang tervalidasi 100% lolos sistem OSS RBA!
+Tidak perlu lagi pusing menginstal QGIS atau mengonversi KML manual. Buka [BikinPolygon GIS Workspace](https://www.bikinpolygon.xyz), gambar lahan Anda di atas peta satelit ber-layer persil BPN, lalu unduh berkas ZIP SHP yang tervalidasi 100% lolos sistem OSS RBA!
 `
     },
     'cara-membuat-polygon-oss-di-hp': {
@@ -74,7 +74,7 @@ Tidak perlu lagi pusing menginstal QGIS atau mengonversi KML manual. Buka [Bikin
 Membuat berkas **Shapefile (.SHP)** untuk perizinan **NIB OSS RBA** kini tidak lagi memerlukan komputer spek tinggi maupun software berat seperti ArcGIS atau QGIS. Dengan menggunakan **BikinPolygon GIS Workspace**, Anda dapat langsung menggambar batas persil lahan langsung dari browser HP Android maupun iPhone.
 
 ### Langkah-Langkah Pembuatan:
-1. **Buka Browser HP Anda**: Akses [bikinpolygon.xyz](https://bikinpolygon.xyz) lewat Chrome atau Safari.
+1. **Buka Browser HP Anda**: Akses [bikinpolygon.xyz](https://www.bikinpolygon.xyz) lewat Chrome atau Safari.
 2. **Cari Lokasi Lahan**: Masukkan alamat lokasi atau titik koordinat GPS (*latitude, longitude*).
 3. **Aktifkan Layer Persil Tanah**: Gunakan fitur **Batas Persil Pertanahan** sebagai acuan patok fisik lahan.
 4. **Digitasi Titik Lahan**: Sentuh layar untuk menambahkan titik-titik polygon batas lahan Anda secara akurat.
@@ -140,7 +140,7 @@ Pilih Kode Klasifikasi Baku Lapangan Usaha Indonesia (KBLI) 5 digit yang sesuai 
 
 ### Langkah 3: Upload Peta Polygon Lahan Usaha
 Pada tahap Tata Ruang (KKPR), Anda diwajibkan mengunggah file **Shapefile (.SHP)** lokasi kegiatan usaha.
-- Gunakan [bikinpolygon.xyz](https://bikinpolygon.xyz) untuk menggambar polygon lahan Anda.
+- Gunakan [bikinpolygon.xyz](https://www.bikinpolygon.xyz) untuk menggambar polygon lahan Anda.
 - Unduh berkas ZIP SHP dan upload ke formulir OSS.
 
 ### Langkah 4: Terbitnya NIB & Sertifikat Standar
@@ -212,11 +212,11 @@ export default function BlogPostPage() {
             "name": "BikinPolygon",
             "logo": {
                 "@type": "ImageObject",
-                "url": "https://bikinpolygon.xyz/assets/logo.svg"
+                "url": "https://www.bikinpolygon.xyz/assets/logo.svg"
             }
         },
         "datePublished": post.created_at,
-        "mainEntityOfPage": `https://bikinpolygon.xyz/blog/${post.slug}`
+        "mainEntityOfPage": `https://www.bikinpolygon.xyz/blog/${post.slug}`
     } : null;
 
     return (
@@ -224,7 +224,7 @@ export default function BlogPostPage() {
             <SEOHead 
                 title={`${post.title} | BikinPolygon Blog`} 
                 description={post.excerpt || post.title} 
-                canonicalUrl={`https://bikinpolygon.xyz/blog/${post.slug}`}
+                canonicalUrl={`https://www.bikinpolygon.xyz/blog/${post.slug}`}
                 type="article"
                 schemaData={articleSchema}
             />
