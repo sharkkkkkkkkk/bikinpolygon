@@ -111,8 +111,8 @@ export default function LandingFooter() {
                         &copy; {new Date().getFullYear()} BikinPolygon GIS Systems. Hak Cipta Dilindungi.
                     </div>
                     <div className="flex items-center gap-6">
-                        <Link to="/" className="hover:text-slate-400 transition-colors">Privasi</Link>
-                        <Link to="/" className="hover:text-slate-400 transition-colors">Syarat & Ketentuan</Link>
+                        <Link to="/privacy" className="hover:text-slate-400 transition-colors">Privasi</Link>
+                        <Link to="/terms" className="hover:text-slate-400 transition-colors">Syarat & Ketentuan</Link>
                         <Link to="/" className="hover:text-slate-400 transition-colors">Dokumentasi API</Link>
                     </div>
                 </div>

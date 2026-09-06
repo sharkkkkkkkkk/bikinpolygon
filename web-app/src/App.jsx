@@ -9,6 +9,8 @@ import DashboardPage from './pages/DashboardPage';
 import TopUpPage from './pages/TopUpPage';
 import KelolaPage from './pages/KelolaPage';
 import AdminAEOPage from './pages/AdminAEOPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsPage from './pages/TermsPage';
 
 const ProtectedRoute = ({ children }) => {
     const { user, loading } = useAuth();
@@ -124,6 +126,12 @@ export default function App() {
                                 </AdminRoute>
                             } 
                         />
+
+                        {/* Public Legal Pages (Google OAuth Compliance) */}
+                        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route path="/terms" element={<TermsPage />} />
+                        <Route path="/terms-of-service" element={<TermsPage />} />
 
                         <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>

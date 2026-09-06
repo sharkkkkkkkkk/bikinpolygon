@@ -2,14 +2,50 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://bikinpolygon.xyz/</loc>
-    <lastmod>2026-08-29</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://bikinpolygon.xyz/harga</loc>
-    <lastmod>2026-08-29</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bikinpolygon.xyz/privacy</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://bikinpolygon.xyz/terms</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://bikinpolygon.xyz/blog/cara-membuat-polygon-oss-di-hp</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bikinpolygon.xyz/blog/cara-membuat-polygon-nib-dan-amdalnet-tanpa-gis</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bikinpolygon.xyz/blog/apa-itu-peta-polygon-oss-rba-dan-tapak-proyek-amdalnet</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bikinpolygon.xyz/blog/cara-mendapatkan-nib-pelaku-usaha-di-oss-rba</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>
