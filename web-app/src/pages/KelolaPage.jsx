@@ -294,7 +294,7 @@ export default function Kelola() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-emerald-600">Online</div>
-                            <p className="text-xs text-muted-foreground">Pakasir Gateway Active</p>
+                            <p className="text-xs text-muted-foreground">Payment Gateway Active</p>
                         </CardContent>
                     </Card>
                 </div>

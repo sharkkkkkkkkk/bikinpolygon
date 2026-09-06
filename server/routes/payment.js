@@ -358,7 +358,7 @@ router.post('/claim-order', async (req, res) => {
             });
         } else {
             return res.status(400).json({
-                error: `Order ID "${cleanOrderId}" belum terverifikasi selesai di gateway Pakasir. Pastikan Order ID benar dan pembayaran sudah berhasil diselesaikan.`
+                error: `Order ID "${cleanOrderId}" belum terverifikasi selesai. Pastikan Order ID benar dan pembayaran sudah berhasil diselesaikan.`
             });
         }
     } catch (err) {

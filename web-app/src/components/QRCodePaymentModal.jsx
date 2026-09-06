@@ -58,7 +58,7 @@ export default function QRCodePaymentModal({ isOpen, onClose }) {
                     const status = await checkAccessStatus(orderData.orderId);
                     if (status?.isOrderCompleted || status?.orderStatus === 'completed') {
                         clearInterval(pollInterval);
-                        alert('🎉 Pembayaran Berhasil! Pakasir Webhook telah mengonfirmasi pembayaran & hak akses BikinPolygon Pass Anda aktif.');
+                        alert('🎉 Pembayaran Berhasil! Sistem telah mengonfirmasi pembayaran & hak akses BikinPolygon Pass Anda aktif.');
                         window.location.reload();
                     }
                 } catch (e) {}
@@ -108,10 +108,10 @@ export default function QRCodePaymentModal({ isOpen, onClose }) {
         try {
             const status = await checkAccessStatus(orderData?.orderId);
             if (status?.isOrderCompleted || status?.orderStatus === 'completed') {
-                alert('🎉 Pembayaran Berhasil Terverifikasi! Pakasir Webhook telah mengaktifkan BikinPolygon Pass Anda.');
+                alert('🎉 Pembayaran Berhasil Terverifikasi! Hak akses BikinPolygon Pass Anda telah aktif.');
                 window.location.reload();
             } else {
-                alert('Sistem belum menerima konfirmasi Webhook dari Pakasir. Silakan selesaikan pembayaran via QR Code.');
+                alert('Sistem belum menerima konfirmasi pembayaran. Silakan selesaikan pembayaran via QR Code.');
             }
         } catch (e) {
             console.error(e);
@@ -283,14 +283,12 @@ export default function QRCodePaymentModal({ isOpen, onClose }) {
                                 ) : (
                                     <RefreshCw className="w-4 h-4 text-white" />
                                 )}
-                                <span>Menunggu Konfirmasi Webhook Pakasir...</span>
+                                <span>Menunggu Konfirmasi Pembayaran QRIS...</span>
                             </Button>
-
-
 
                             <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 font-semibold text-center pt-1">
                                 <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                                <span>Konfirmasi dilakukan otomatis via Webhook Pakasir setelah Anda scan QRIS</span>
+                                <span>Konfirmasi dilakukan otomatis secara instan setelah Anda scan QRIS</span>
                             </div>
 
                             <Button

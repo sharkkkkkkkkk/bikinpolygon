@@ -344,7 +344,7 @@ export default function Dashboard() {
                                         size="sm"
                                         className="w-full bg-[#ADFA1D] hover:bg-[#9fe318] text-black font-extrabold text-xs h-8 rounded-lg flex items-center justify-center gap-1.5 shadow-md"
                                     >
-                                        <Zap className="w-3.5 h-3.5 fill-black" /> Buka Akses / Pakasir Pass
+                                        <Zap className="w-3.5 h-3.5 fill-black" /> Buka Akses / BikinPolygon Pass
                                     </Button>
                                 </div>
                             )}
