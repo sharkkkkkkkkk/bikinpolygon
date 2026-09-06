@@ -8,7 +8,7 @@ export const KEYWORD_CLUSTERS = [
         clusterId: "core-landing-tool",
         name: "Core GIS Workspace & Generator",
         targetPage: "/",
-        targetUrl: "https://bikinpolygon.xyz/",
+        targetUrl: "https://www.bikinpolygon.xyz/",
         primaryKeyword: "buat polygon oss rba online",
         secondaryKeywords: [
             "upload peta polygon nib oss",
@@ -26,7 +26,7 @@ export const KEYWORD_CLUSTERS = [
         clusterId: "troubleshooting-error-oss",
         name: "Solusi Upload Polygon OSS Gagal & Ditolak",
         targetPage: "/blog/kenapa-upload-polygon-oss-gagal-dan-solusinya",
-        targetUrl: "https://bikinpolygon.xyz/blog/kenapa-upload-polygon-oss-gagal-dan-solusinya",
+        targetUrl: "https://www.bikinpolygon.xyz/blog/kenapa-upload-polygon-oss-gagal-dan-solusinya",
         primaryKeyword: "kenapa upload polygon oss gagal",
         secondaryKeywords: [
             "penyebab polygon kkpr ditolak",
@@ -44,7 +44,7 @@ export const KEYWORD_CLUSTERS = [
         clusterId: "mobile-digitization",
         name: "Digitasi Polygon via HP / Smartphone",
         targetPage: "/blog/cara-membuat-polygon-oss-di-hp",
-        targetUrl: "https://bikinpolygon.xyz/blog/cara-membuat-polygon-oss-di-hp",
+        targetUrl: "https://www.bikinpolygon.xyz/blog/cara-membuat-polygon-oss-di-hp",
         primaryKeyword: "cara buat polygon oss di hp",
         secondaryKeywords: [
             "cara membuat polygon oss di hp android",
@@ -61,7 +61,7 @@ export const KEYWORD_CLUSTERS = [
         clusterId: "qgis-alternative-komparasi",
         name: "Alternatif QGIS & ArcGIS Tanpa Software Berat",
         targetPage: "/blog/cara-membuat-polygon-nib-dan-amdalnet-tanpa-gis",
-        targetUrl: "https://bikinpolygon.xyz/blog/cara-membuat-polygon-nib-dan-amdalnet-tanpa-gis",
+        targetUrl: "https://www.bikinpolygon.xyz/blog/cara-membuat-polygon-nib-dan-amdalnet-tanpa-gis",
         primaryKeyword: "cara membuat polygon tanpa qgis",
         secondaryKeywords: [
             "alternatif qgis untuk oss rba",
@@ -78,7 +78,7 @@ export const KEYWORD_CLUSTERS = [
         clusterId: "regulasi-tata-ruang-kkpr",
         name: "Pemahaman Regulasi Spasial OSS & AMDALNET",
         targetPage: "/blog/apa-itu-peta-polygon-oss-rba-dan-tapak-proyek-amdalnet",
-        targetUrl: "https://bikinpolygon.xyz/blog/apa-itu-peta-polygon-oss-rba-dan-tapak-proyek-amdalnet",
+        targetUrl: "https://www.bikinpolygon.xyz/blog/apa-itu-peta-polygon-oss-rba-dan-tapak-proyek-amdalnet",
         primaryKeyword: "apa itu peta polygon oss rba",
         secondaryKeywords: [
             "fungsi shapefile kkpr oss",
@@ -95,7 +95,7 @@ export const KEYWORD_CLUSTERS = [
         clusterId: "alur-lengkap-nib-oss",
         name: "Panduan Alur Pengurusan NIB Pelaku Usaha",
         targetPage: "/blog/cara-mendapatkan-nib-pelaku-usaha-di-oss-rba",
-        targetUrl: "https://bikinpolygon.xyz/blog/cara-mendapatkan-nib-pelaku-usaha-di-oss-rba",
+        targetUrl: "https://www.bikinpolygon.xyz/blog/cara-mendapatkan-nib-pelaku-usaha-di-oss-rba",
         primaryKeyword: "cara mendapatkan nib di oss rba",
         secondaryKeywords: [
             "tahap upload lokasi usaha oss",
