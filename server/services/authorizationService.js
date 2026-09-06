@@ -59,6 +59,16 @@ async function authorizeExportService(supabase, userId, { exportType = 'OSS_SHP'
     };
   }
 
+  // 2. Free Tier: Luas <= 50 m2 gratis untuk semua pengguna
+  if (calculatedArea > 0 && calculatedArea <= 50) {
+    return {
+      authorized: true,
+      calculatedArea,
+      accessType: 'FREE_TIER',
+      message: `Export disetujui (Free Tier ≤ 50 m² - Luas: ${calculatedArea.toFixed(2)} m²).`
+    };
+  }
+
   const now = new Date();
   const hasActiveTimePass = user.access_until && new Date(user.access_until) > now;
   const hasTokenBalance = (user.token_balance || 0) > 0;

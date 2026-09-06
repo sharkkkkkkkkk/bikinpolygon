@@ -173,28 +173,20 @@ export function AmdalnetExportPanel({ existingPolygonGeoJSON, onRequireAuth, isO
       return;
     }
 
-    // 1. Device Trial / Paid Duration Access Check (Free Tier <= 50m2 bypasses paywall)
+    // 1. Device / Account Paid Duration Access Check (Free Tier <= 50m2 bypasses paywall)
     const numericArea = parseFloat(String(correctedArea).replace(',', '.')) || 0;
     const isFreeTier = numericArea > 0 && numericArea <= 50;
 
-    if (!isFreeTier) {
+    if (!isFreeTier && user?.role !== 'admin') {
       const access = await checkAccessStatus();
-      if (!access.isActive) {
-        if (!hasUsedFreeTrial()) {
-          markFreeTrialUsed();
-          toast({
-            title: "Ekspor Gratis 1x Berhasil Digunakan! 🎁",
-            description: "Untuk ekspor selanjutnya, silakan pilih durasi akses."
-          });
-        } else {
-          toast({
-            title: "Akses Diperlukan (Luas > 50 m²) 🔒",
-            description: `Luas polygon Anda (${numericArea.toFixed(2)} m²) di atas batas Free Tier (50 m²). Silakan pilih Paket Akses untuk mengunduh.`,
-            variant: "destructive"
-          });
-          setPakasirModalOpen(true);
-          return;
-        }
+      if (!access?.isActive) {
+        toast({
+          title: "Akses Diperlukan (Luas > 50 m²) 🔒",
+          description: `Luas polygon Anda (${numericArea.toFixed(2)} m²) melebihi batas Free Tier (≤ 50 m²). Silakan buka Paket Akses untuk mengunduh.`,
+          variant: "destructive"
+        });
+        setPakasirModalOpen(true);
+        return;
       }
     }
 
@@ -205,7 +197,7 @@ export function AmdalnetExportPanel({ existingPolygonGeoJSON, onRequireAuth, isO
       setLoading(true);
       if (user) {
         try {
-          await api.post('/generator/authorize-export', { exportType: isAmdalMode ? 'AMDALNET_SHP' : 'OSS_SHP', customPoints: pts });
+          await api.post('/generator/authorize-export', { exportType: isAmdalMode ? 'AMDALNET_SHP' : 'OSS_SHP', customPoints: pts, area: numericArea });
         } catch (e) {
           console.warn("Authorize export backend check skipped:", e);
         }
@@ -248,28 +240,20 @@ export function AmdalnetExportPanel({ existingPolygonGeoJSON, onRequireAuth, isO
       return;
     }
 
-    // 1. Device Trial / Paid Duration Access Check (Free Tier <= 50m2 bypasses paywall)
+    // 1. Device / Account Paid Duration Access Check (Free Tier <= 50m2 bypasses paywall)
     const numericArea = parseFloat(String(correctedArea).replace(',', '.')) || 0;
     const isFreeTier = numericArea > 0 && numericArea <= 50;
 
-    if (!isFreeTier) {
+    if (!isFreeTier && user?.role !== 'admin') {
       const access = await checkAccessStatus();
-      if (!access.isActive) {
-        if (!hasUsedFreeTrial()) {
-          markFreeTrialUsed();
-          toast({
-            title: "Ekspor Gratis 1x Berhasil Digunakan! 🎁",
-            description: "Untuk ekspor selanjutnya, silakan pilih durasi akses."
-          });
-        } else {
-          toast({
-            title: "Akses Diperlukan (Luas > 50 m²) 🔒",
-            description: `Luas polygon Anda (${numericArea.toFixed(2)} m²) di atas batas Free Tier (50 m²). Silakan pilih Paket Akses untuk mengunduh.`,
-            variant: "destructive"
-          });
-          setPakasirModalOpen(true);
-          return;
-        }
+      if (!access?.isActive) {
+        toast({
+          title: "Akses Diperlukan (Luas > 50 m²) 🔒",
+          description: `Luas polygon Anda (${numericArea.toFixed(2)} m²) melebihi batas Free Tier (≤ 50 m²). Silakan buka Paket Akses untuk mengunduh.`,
+          variant: "destructive"
+        });
+        setPakasirModalOpen(true);
+        return;
       }
     }
 
@@ -280,7 +264,7 @@ export function AmdalnetExportPanel({ existingPolygonGeoJSON, onRequireAuth, isO
       setLoading(true);
       if (user) {
         try {
-          await api.post('/generator/authorize-export', { exportType: isAmdalMode ? 'AMDALNET_PDF' : 'OSS_PDF', customPoints: pts });
+          await api.post('/generator/authorize-export', { exportType: isAmdalMode ? 'AMDALNET_PDF' : 'OSS_PDF', customPoints: pts, area: numericArea });
         } catch (e) {
           console.warn("Authorize export backend check skipped:", e);
         }
@@ -316,12 +300,12 @@ export function AmdalnetExportPanel({ existingPolygonGeoJSON, onRequireAuth, isO
     const numericArea = parseFloat(String(correctedArea).replace(',', '.')) || 0;
     const isFreeTier = numericArea > 0 && numericArea <= 50;
 
-    if (!isFreeTier) {
+    if (!isFreeTier && user?.role !== 'admin') {
       const access = await checkAccessStatus();
-      if (!access.isActive) {
+      if (!access?.isActive) {
         toast({
           title: "Akses Diperlukan (Luas > 50 m²) 🔒",
-          description: `Luas polygon Anda (${numericArea.toFixed(2)} m²) di atas batas Free Tier (50 m²). Silakan pilih Paket Akses untuk mengunduh.`,
+          description: `Luas polygon Anda (${numericArea.toFixed(2)} m²) melebihi batas Free Tier (≤ 50 m²). Anda harus membuka Paket Akses untuk mengunduh file ini.`,
           variant: "destructive"
         });
         setPakasirModalOpen(true);
