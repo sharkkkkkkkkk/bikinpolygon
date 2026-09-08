@@ -124,26 +124,222 @@ export default function LandingPage() {
         }
     ];
 
-    const faqSchema = {
+    const homeSchemaGraph = {
         "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": faqs.map(item => ({
-            "@type": "Question",
-            "name": item.q,
-            "acceptedAnswer": {
-                "@type": "Answer",
-                "text": item.a
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "https://www.bikinpolygon.xyz/#organization",
+                "name": "Bikin Polygon",
+                "alternateName": [
+                    "BikinPolygon",
+                    "Bikin Polygon GIS Workspace",
+                    "Bikin Polygon Online"
+                ],
+                "url": "https://www.bikinpolygon.xyz",
+                "logo": {
+                    "@type": "ImageObject",
+                    "@id": "https://www.bikinpolygon.xyz/#logo",
+                    "url": "https://www.bikinpolygon.xyz/assets/logo.svg",
+                    "caption": "Bikin Polygon Logo"
+                },
+                "image": "https://www.bikinpolygon.xyz/assets/og-cover.jpg",
+                "description": "Penyedia platform SaaS dan tools pembuat polygon online untuk perizinan berusaha NIB OSS RBA (Kementerian Investasi/BKPM) dan dokumen lingkungan AMDALNET (Kementerian Lingkungan Hidup dan Kehutanan) tanpa memerlukan software GIS.",
+                "slogan": "Tools Pembuat Polygon OSS dan Amdalnet Online Tanpa Software GIS",
+                "areaServed": {
+                    "@type": "Country",
+                    "name": "Indonesia"
+                },
+                "knowsAbout": [
+                    "Pembuatan Polygon OSS",
+                    "Polygon Amdalnet",
+                    "Peta Tapak Proyek Amdalnet",
+                    "Kesesuaian Kegiatan Pemanfaatan Ruang (KKPR)",
+                    "Nomor Induk Berusaha (NIB OSS RBA)",
+                    "Format Shapefile (.SHP, .SHX, .DBF, .PRJ)",
+                    "Sistem Informasi Geografis (GIS) Online",
+                    "Sistem Koordinat Geografis WGS 84 EPSG:4326",
+                    "Web Mercator EPSG:3857",
+                    "Batas Persil Pertanahan ATR/BPN",
+                    "Peraturan BKPM No. 4 Tahun 2021"
+                ],
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "telephone": "+62-889-8384-0979",
+                    "contactType": "customer service",
+                    "areaServed": "ID",
+                    "availableLanguage": "Indonesian"
+                },
+                "sameAs": [
+                    "https://github.com/sharkkkkkkkkk/bikinpolygon",
+                    "https://app.bikinpolygon.xyz"
+                ]
+            },
+            {
+                "@type": ["WebApplication", "SoftwareApplication"],
+                "@id": "https://www.bikinpolygon.xyz/#software",
+                "name": "Bikin Polygon",
+                "alternateName": "Bikin Polygon Tools Pembuat Polygon Online",
+                "applicationCategory": ["BusinessApplication", "GISApplication"],
+                "operatingSystem": "All Modern Web Browsers (Chrome, Edge, Firefox, Safari) di Android, iOS, Windows, macOS",
+                "browserRequirements": "Requires JavaScript. Requires HTML5.",
+                "softwareVersion": "2.5",
+                "url": "https://www.bikinpolygon.xyz",
+                "installUrl": "https://app.bikinpolygon.xyz",
+                "description": "Aplikasi SaaS dan tools pembuat polygon online instan untuk kebutuhan Kesesuaian Kegiatan Pemanfaatan Ruang (KKPR) NIB OSS RBA dan peta tapak proyek AMDALNET KLHK. Langsung menghasilkan paket 4 berkas Shapefile ZIP (.shp, .shx, .dbf, .prj) berstandar WGS84 EPSG:4326 dengan koreksi luas sertifikat tanah BPN.",
+                "provider": {
+                    "@id": "https://www.bikinpolygon.xyz/#organization"
+                },
+                "audience": {
+                    "@type": "Audience",
+                    "audienceType": "Pelaku Usaha, Pemohon NIB OSS RBA, Konsultan Lingkungan AMDAL/UKL-UPL, Notaris/PPAT, Tim Legal Perusahaan"
+                },
+                "featureList": [
+                    "Tools pembuatan polygon OSS online untuk KKPR NIB",
+                    "Tools pembuatan polygon Amdalnet online untuk peta tapak proyek KLHK",
+                    "Ekspor otomatis 4 berkas Shapefile ZIP komplit (.shp, .shx, .dbf, .prj)",
+                    "Standarisasi proyeksi koordinat WGS 84 (EPSG:4326) & Web Mercator (EPSG:3857)",
+                    "Koreksi luas geodesik otomatis pas 100% dengan Sertifikat Tanah BPN",
+                    "Overlay layer batas persil pertanahan kadastral resmi ATR/BPN di atas peta satelit",
+                    "Dapat diakses langsung via HP Android, iPhone, dan Komputer tanpa instalasi software GIS",
+                    "Ekspor Laporan Peta Geospasial resmi berformat PDF"
+                ],
+                "offers": [
+                    {
+                        "@type": "Offer",
+                        "name": "Free Tier (Uji Coba Gratis)",
+                        "price": "0",
+                        "priceCurrency": "IDR",
+                        "description": "Uji coba gratis digitasi polygon lahan ≤ 50 m² tanpa kartu kredit",
+                        "priceValidUntil": "2027-12-31"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Paket Akses Harian 24 Jam",
+                        "price": "27000",
+                        "priceCurrency": "IDR",
+                        "description": "Akses 24 jam penuh tanpa batas luas dan jumlah polygon, ekspor Shapefile ZIP komplit dan PDF",
+                        "priceValidUntil": "2027-12-31"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Paket Akses Mingguan 7 Hari",
+                        "price": "97000",
+                        "priceCurrency": "IDR",
+                        "description": "Akses 7 hari penuh, format tapak proyek AMDALNET KLHK & NIB OSS, prioritas antrean server",
+                        "priceValidUntil": "2027-12-31"
+                    }
+                ]
+            },
+            {
+                "@type": "Service",
+                "@id": "https://www.bikinpolygon.xyz/#service-oss",
+                "name": "Layanan Pembuatan Polygon OSS Online",
+                "serviceType": "Pembuatan Peta Polygon Koordinat NIB OSS RBA",
+                "provider": {
+                    "@id": "https://www.bikinpolygon.xyz/#organization"
+                },
+                "description": "Tools online untuk pembuatan berkas Shapefile (.SHP) polygon batas lokasi usaha yang tervalidasi 100% lolos verifikasi Kesesuaian Kegiatan Pemanfaatan Ruang (KKPR) pada sistem OSS RBA Kementerian Investasi/BKPM.",
+                "areaServed": {
+                    "@type": "Country",
+                    "name": "Indonesia"
+                },
+                "termsOfService": "https://www.bikinpolygon.xyz/terms"
+            },
+            {
+                "@type": "Service",
+                "@id": "https://www.bikinpolygon.xyz/#service-amdalnet",
+                "name": "Layanan Pembuatan Polygon Amdalnet Online",
+                "serviceType": "Pembuatan Peta Tapak Proyek Amdalnet KLHK",
+                "provider": {
+                    "@id": "https://www.bikinpolygon.xyz/#organization"
+                },
+                "description": "Tools online untuk pembuatan peta tapak proyek berformat Shapefile (.SHP) lengkap dengan metadata formulir pemrakarsa sesuai format sistem Amdalnet Kementerian Lingkungan Hidup dan Kehutanan (KLHK).",
+                "areaServed": {
+                    "@type": "Country",
+                    "name": "Indonesia"
+                },
+                "termsOfService": "https://www.bikinpolygon.xyz/terms"
+            },
+            {
+                "@type": "WebSite",
+                "@id": "https://www.bikinpolygon.xyz/#website",
+                "name": "Bikin Polygon",
+                "alternateName": [
+                    "BikinPolygon",
+                    "BikinPolygon.xyz"
+                ],
+                "url": "https://www.bikinpolygon.xyz",
+                "description": "Platform resmi Bikin Polygon — Tools pembuat polygon OSS dan polygon Amdalnet online tanpa software GIS.",
+                "publisher": {
+                    "@id": "https://www.bikinpolygon.xyz/#organization"
+                },
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://www.bikinpolygon.xyz/?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                }
+            },
+            {
+                "@type": "HowTo",
+                "@id": "https://www.bikinpolygon.xyz/#howto",
+                "name": "Cara Membuat Polygon OSS dan Amdalnet Online Tanpa Software GIS",
+                "description": "Panduan praktis 5 langkah membuat berkas Shapefile (.SHP) untuk NIB OSS RBA dan Amdalnet KLHK secara instan di browser.",
+                "step": [
+                    {
+                        "@type": "HowToStep",
+                        "name": "Identifikasi Lokasi",
+                        "text": "Masukkan alamat lahan atau titik koordinat latitude dan longitude lokasi kegiatan usaha.",
+                        "position": 1
+                    },
+                    {
+                        "@type": "HowToStep",
+                        "name": "Batas Persil Pertanahan",
+                        "text": "Aktifkan layer batas persil kadastral resmi ATR/BPN sebagai acuan patok fisik lokasi lahan.",
+                        "position": 2
+                    },
+                    {
+                        "@type": "HowToStep",
+                        "name": "Digitasi Polygon Lahan",
+                        "text": "Hubungkan titik-titik batas lahan langsung di atas citra satelit resolusi tinggi.",
+                        "position": 3
+                    },
+                    {
+                        "@type": "HowToStep",
+                        "name": "Koreksi Luas Geodesik",
+                        "text": "Masukkan angka luas sesuai Sertifikat Tanah BPN agar kalkulator geodesik menyesuaikan luas secara presisi 100%.",
+                        "position": 4
+                    },
+                    {
+                        "@type": "HowToStep",
+                        "name": "Ekspor Berkas Shapefile ZIP",
+                        "text": "Unduh berkas ZIP yang berisi 4 file wajib (.shp, .shx, .dbf, .prj) berstandar WGS84 EPSG:4326 dan unggah ke portal OSS RBA atau Amdalnet.",
+                        "position": 5
+                    }
+                ]
+            },
+            {
+                "@type": "FAQPage",
+                "@id": "https://www.bikinpolygon.xyz/#faq",
+                "mainEntity": faqs.map(item => ({
+                    "@type": "Question",
+                    "name": item.q,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": item.a
+                    }
+                }))
             }
-        }))
+        ]
     };
 
     return (
         <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-slate-900 overflow-x-hidden font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#ADFA1D] selection:text-black">
             <SEOHead
-                title="BikinPolygon — Buat Peta Polygon OSS RBA & AMDALNET Online | Gratis & Tanpa GIS"
-                description="Generator Shapefile (SHP) Polygon Lahan NIB OSS RBA & Peta Tapak Proyek AMDALNET KLHK instan tanpa ArcGIS/QGIS. Presisi WGS84 & Web Mercator."
+                title="Bikin Polygon — Tools Pembuat Polygon OSS dan Amdalnet Online Tanpa Software GIS"
+                description="Bikin Polygon adalah tools pembuat polygon online untuk NIB OSS RBA dan AMDALNET KLHK. Buat file Shapefile (SHP) instan dari browser tanpa software ArcGIS atau QGIS."
                 canonicalUrl="https://www.bikinpolygon.xyz/"
-                schemaData={faqSchema}
+                schemaData={homeSchemaGraph}
             />
             <LandingNavbar />
 
