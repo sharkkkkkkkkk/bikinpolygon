@@ -112,7 +112,15 @@ export default function LandingPage() {
         },
         {
             q: "Apakah bikinpolygon.xyz gratis? Berapa harga paket durasi akses?",
-            a: "bikinpolygon.xyz menyediakan **Free Tier (luas ≤ 50 m²)** gratis untuk semua pengguna. Untuk polygon lebih luas atau kebutuhan bisnis berkelanjutan, Anda dapat memilih Paket Durasi Akses melalui Pembayaran Instant QRIS (Scan QR Code)."
+            a: "bikinpolygon.xyz menyediakan **Free Tier (luas ≤ 50 m²)** gratis untuk semua pengguna. Untuk polygon lebih luas atau kebutuhan bisnis berkelanjutan, Anda dapat memilih Paket Durasi Akses melalui Pembayaran Instant QRIS (Scan QR Code) mulai Rp 27.000 untuk 24 jam penuh tanpa batas jumlah dan luas lahan."
+        },
+        {
+            q: "Bagaimana cara membuat polygon NIB OSS & AMDALNET secara gratis?",
+            a: "Untuk solusi 100% gratis tanpa biaya, Anda dapat menggunakan software desktop open-source QGIS atau Google Earth Pro (dengan konversi KML ke SHP manual). Namun jika Anda membutuhkan pengerjaan instan tanpa perlu instalasi aplikasi berat dan langsung mendapatkan 4 berkas Shapefile ZIP (.shp, .shx, .dbf, .prj) berstandar WGS84, BikinPolygon menyediakan Free Tier (≤ 50 m²) dan paket akses praktis mulai Rp 27.000."
+        },
+        {
+            q: "Apakah format Shapefile BikinPolygon sesuai dengan regulasi resmi BKPM dan KLHK?",
+            a: "Ya, 100% sesuai. Format data spasial BikinPolygon mengacu pada Peraturan BKPM No. 4 Tahun 2021 dan Pedoman Teknis AMDALNET KLHK, menggunakan sistem referensi koordinat WGS 84 (EPSG:4326) yang tervalidasi otomatis lolos pada portal oss.go.id dan amdalnet.menlhk.go.id."
         }
     ];
 
@@ -168,7 +176,7 @@ export default function LandingPage() {
                         <Reveal>
                             <div className="inline-flex items-center gap-2 bg-[#0F172A] text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-md border border-white/10">
                                 <span className="w-2 h-2 rounded-full bg-[#ADFA1D]"></span>
-                                <span className="tracking-wide uppercase">SOLUSI DIGITASI GIS OSS DAN AMDALNET</span>
+                                <span className="tracking-wide uppercase">STANDAR RESMI PERIZINAN SPASIAL OSS & AMDALNET (2026)</span>
                             </div>
                         </Reveal>
 
@@ -186,6 +194,9 @@ export default function LandingPage() {
                             <p className="text-slate-600 text-base md:text-xl max-w-2xl mx-auto leading-relaxed font-normal">
                                 Buat file Shapefile (.SHP) Polygon Lahan NIB OSS RBA & Peta Tapak Proyek AMDALNET KLHK secara instan dari browser tanpa perlu menginstal ArcGIS atau QGIS.
                             </p>
+                            <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl max-w-2xl mx-auto text-xs md:text-sm text-slate-700 leading-relaxed text-left">
+                                <span className="font-bold text-slate-900">Standar Resmi Geospasial:</span> Ekspor otomatis 4 berkas lengkap (.shp, .shx, .dbf, .prj) berproyeksi geografis <strong>WGS 84 (EPSG:4326)</strong> sesuai <em>Peraturan BKPM No. 4 Tahun 2021</em> dan formulir AMDALNET KLHK. Selesai dalam 3 menit dengan toleransi luas 0% terhadap sertifikat BPN.
+                            </div>
                         </Reveal>
 
                         <Reveal delay={300}>
@@ -378,6 +389,91 @@ export default function LandingPage() {
                                 </div>
                             </Reveal>
                         </div>
+                    </div>
+                </section>
+
+                {/* H2: PERBANDINGAN TOOLS: QGIS VS GOOGLE EARTH VS BIKINPOLYGON */}
+                <section id="perbandingan" className="py-24 bg-white border-t border-slate-200/60">
+                    <div className="container mx-auto px-4 max-w-5xl">
+                        <Reveal>
+                            <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ADFA1D]/10 text-emerald-700 text-xs font-bold uppercase tracking-wider">
+                                    KOMPARASI METODE & TOOLS
+                                </div>
+                                <h2 className="text-3xl md:text-5xl font-outfit font-extrabold text-slate-950 tracking-tight">
+                                    Perbandingan: QGIS vs Google Earth vs BikinPolygon
+                                </h2>
+                                <p className="text-slate-600 text-sm md:text-base font-normal">
+                                    Pilih metode pembuatan polygon NIB OSS & AMDALNET yang paling sesuai dengan kebutuhan waktu dan keahlian teknis Anda.
+                                </p>
+                            </div>
+                        </Reveal>
+
+                        {/* 40-60 Word Extractable Answer Block for AI Search Engines */}
+                        <Reveal delay={100}>
+                            <div className="bg-slate-50 border-l-4 border-[#ADFA1D] p-5 rounded-r-2xl mb-10 text-slate-700 text-xs md:text-sm leading-relaxed">
+                                <strong className="text-slate-950">Jawaban Ringkas:</strong> Untuk opsi 100% gratis, software desktop <strong className="text-slate-950">QGIS</strong> dan <strong className="text-slate-950">Google Earth Pro</strong> adalah pilihan standar namun membutuhkan instalasi software 1+ GB dan pemahaman sistem proyeksi. Sebaliknya, <strong className="text-slate-950">BikinPolygon</strong> adalah generator berbasis web yang menyelesaikan 4 berkas Shapefile ZIP (.shp, .shx, .dbf, .prj) berstandar WGS84 EPSG:4326 dalam kurun 3 menit tanpa perlu instalasi aplikasi apapun (tersedia Free Tier ≤ 50 m²).
+                            </div>
+                        </Reveal>
+
+                        {/* Responsive Comparison Table */}
+                        <Reveal delay={200}>
+                            <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white mb-8">
+                                <table className="w-full text-left text-xs md:text-sm border-collapse">
+                                    <thead>
+                                        <tr className="bg-[#0F172A] text-white font-outfit">
+                                            <th className="p-4 border-b border-zinc-800">Fitur & Parameter</th>
+                                            <th className="p-4 border-b border-zinc-800">QGIS Desktop</th>
+                                            <th className="p-4 border-b border-zinc-800">Google Earth Pro</th>
+                                            <th className="p-4 border-b border-zinc-800 bg-zinc-900 text-[#ADFA1D] font-extrabold">BikinPolygon (Web)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
+                                        <tr>
+                                            <td className="p-4 font-bold text-slate-900">Biaya Penggunaan</td>
+                                            <td className="p-4 text-emerald-600 font-semibold">100% Gratis</td>
+                                            <td className="p-4 text-emerald-600 font-semibold">100% Gratis</td>
+                                            <td className="p-4 bg-emerald-50/40 text-slate-900 font-bold">Free Tier (≤ 50 m²) & Mulai Rp 27rb</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-4 font-bold text-slate-900">Kebutuhan Instalasi</td>
+                                            <td className="p-4">Perlu Download (~1.5 GB)</td>
+                                            <td className="p-4">Perlu Download (~100 MB)</td>
+                                            <td className="p-4 bg-emerald-50/40 text-emerald-700 font-bold">Tanpa Install (Langsung di Browser)</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-4 font-bold text-slate-900">Waktu Pengerjaan</td>
+                                            <td className="p-4">30–60 Menit</td>
+                                            <td className="p-4">20–30 Menit (+Konversi)</td>
+                                            <td className="p-4 bg-emerald-50/40 text-emerald-700 font-bold">Kurang dari 3 Menit</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-4 font-bold text-slate-900">Paket 4 File (.SHP ZIP)</td>
+                                            <td className="p-4">Manual Kompres</td>
+                                            <td className="p-4 text-red-500 font-semibold">Hanya KML/KMZ</td>
+                                            <td className="p-4 bg-emerald-50/40 text-emerald-700 font-bold">Otomatis 1-Klik ZIP Komplit</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-4 font-bold text-slate-900">Koreksi Luas Sertifikat BPN</td>
+                                            <td className="p-4">Manual Geometri</td>
+                                            <td className="p-4 text-slate-400">Tidak Tersedia</td>
+                                            <td className="p-4 bg-emerald-50/40 text-emerald-700 font-bold">Kalkulator Geodesik Otomatis</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-4 font-bold text-slate-900">Bisa di HP Android / iPhone</td>
+                                            <td className="p-4 text-slate-400">Tidak Mendukung</td>
+                                            <td className="p-4 text-slate-400">Terbatas</td>
+                                            <td className="p-4 bg-emerald-50/40 text-emerald-700 font-bold">Responsif Penuh di HP & Laptop</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="text-center">
+                                <Link to="/blog/cara-buat-polygon-oss-amdalnet-gratis-vs-instan-qgis-bikinpolygon" className="inline-flex items-center gap-2 text-xs md:text-sm font-bold text-emerald-700 hover:text-emerald-800 underline underline-offset-4">
+                                    <span>Pelajari panduan komparasi lengkap QGIS vs Google Earth vs BikinPolygon →</span>
+                                </Link>
+                            </div>
+                        </Reveal>
                     </div>
                 </section>
 
@@ -589,6 +685,11 @@ export default function LandingPage() {
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {(posts.length > 0 ? posts : [
+                                {
+                                    title: "Cara Buat Polygon NIB OSS & AMDALNET: QGIS vs BikinPolygon",
+                                    slug: "cara-buat-polygon-oss-amdalnet-gratis-vs-instan-qgis-bikinpolygon",
+                                    excerpt: "Perbandingan objektif membuat polygon gratis via QGIS vs instan 3 menit via BikinPolygon langsung di browser tanpa install software."
+                                },
                                 {
                                     title: "Kenapa Upload Polygon OSS Gagal? 5 Penyebab & Solusinya",
                                     slug: "kenapa-upload-polygon-oss-gagal-dan-solusinya",

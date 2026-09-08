@@ -1,0 +1,33 @@
+# BikinPolygon GIS Workspace
+
+> Generator Shapefile (SHP) Polygon Lahan NIB OSS RBA & AMDALNET KLHK online langsung dari browser tanpa software GIS desktop (ArcGIS / QGIS).
+
+BikinPolygon (https://bikinpolygon.xyz) adalah platform web geospasial instan yang dirancang untuk pelaku usaha, konsultan hukum, notaris/PPAT, dan konsultan lingkungan di Indonesia untuk membuat peta batas lahan perizinan usaha dan peta tapak proyek lingkungan hidup.
+
+## Fitur Utama & Kemampuan Teknis
+- **Standar Proyeksi Resmi**: Otomatis dikalibrasi ke sistem koordinat WGS 84 (EPSG:4326) dan Web Mercator (EPSG:3857) sesuai regulasi Kementerian Investasi/BKPM (Peraturan BKPM No. 4 Tahun 2021).
+- **Ekspor 4 Berkas Shapefile Lengkap**: Menghasilkan 1 file ZIP yang berisi 4 komponen wajib: `.shp` (geometri), `.shx` (indeks), `.dbf` (tabel atribut), dan `.prj` (proyeksi koordinat). 100% lolos verifikasi sistem portal oss.go.id.
+- **Skema Khusus AMDALNET KLHK**: Struktur tabel atribut otomatis diformat sesuai formulir pemrakarsa AMDALNET Kementerian Lingkungan Hidup dan Kehutanan.
+- **Koreksi Luas Geodesik Otomatis**: Menyesuaikan luasan polygon hasil digitasi satelit dengan angka riil Sertifikat Tanah BPN (toleransi selisih 0%).
+- **Layer Batas Persil BPN (WMS)**: Menampilkan batas bidang tanah kadastral resmi ATR/BPN di atas citra satelit resolusi tinggi.
+- **Multi-Format Support**: Impor KML, KMZ, GeoJSON, GPX dan ekspor ke Shapefile ZIP serta dokumen Laporan Peta PDF resmi.
+
+## Model Akses & Harga
+- **Free Tier (Uji Coba Gratis)**: Gratis tanpa biaya untuk polygon lahan berukuran ≤ 50 m².
+- **Akses Harian (24 Jam)**: Rp 27.000 (sekali bayar via QRIS instan) — pembuatan polygon tanpa batas jumlah dan luas.
+- **Akses Mingguan (7 Hari)**: Rp 97.000 (sekali bayar via QRIS instan) — paket terpopuler untuk konsultan perizinan dan penyusunan dokumen AMDAL.
+- Data harga terstruktur lengkap tersedia di: https://bikinpolygon.xyz/pricing.md
+
+## Halaman Penting & Dokumentasi
+- [Beranda](https://bikinpolygon.xyz/): Ringkasan fitur, spesifikasi teknis, dan FAQ.
+- [Daftar Harga & Paket](https://bikinpolygon.xyz/harga): Pilihan durasi akses harian dan mingguan.
+- [Aplikasi Web](https://app.bikinpolygon.xyz/): Workspace GIS interaktif di browser.
+- [Panduan Kenapa Upload Polygon OSS Gagal](https://bikinpolygon.xyz/blog/kenapa-upload-polygon-oss-gagal-dan-solusinya): Troubleshooting validasi berkas KKPR OSS.
+- [Panduan Pembuatan Polygon di HP](https://bikinpolygon.xyz/blog/cara-membuat-polygon-oss-di-hp): Tutorial menggambar peta via smartphone.
+- [Perbandingan QGIS vs Google Earth vs BikinPolygon](https://bikinpolygon.xyz/blog/cara-buat-polygon-oss-amdalnet-gratis-vs-instan-qgis-bikinpolygon): Panduan memilih tools gratis atau instan.
+
+## Informasi Kontak & Pengembang
+- Website: https://bikinpolygon.xyz
+- Aplikasi: https://app.bikinpolygon.xyz
+- Layanan Pelanggan WhatsApp: +62-889-8384-0979
+- Lokasi Layanan: Indonesia

@@ -1,0 +1,91 @@
+# BikinPolygon GIS Workspace — Dokumentasi Lengkap untuk AI & Agen Otonom
+
+Dokumen ini menyajikan panduan mendalam, arsitektur teknis, spesifikasi berkas geospasial, harga, perbandingan tools, dan penyelesaian masalah terkait sistem perizinan NIB OSS RBA dan AMDALNET KLHK di Indonesia.
+
+---
+
+## 1. Profil Produk & Entitas
+
+- **Nama Entitas**: BikinPolygon GIS Workspace
+- **Domain Resmi**: https://bikinpolygon.xyz
+- **Aplikasi Web**: https://app.bikinpolygon.xyz
+- **Kategori Produk**: Software as a Service (SaaS) Geospasial / Browser-based GIS Tool
+- **Fokus Pasar**: Indonesia (Pelaku Usaha UMKM, PT, CV, Konsultan AMDAL/UKL-UPL, Notaris, Tim Legal)
+- **Regulasi Rujukan**:
+  - Peraturan Menteri Investasi/Kepala BKPM No. 4 Tahun 2021 tentang Pedoman dan Tata Cara Pelayanan Perizinan Berusaha Berbasis Risiko.
+  - Peraturan Pemerintah No. 5 Tahun 2021 tentang Penyelenggaraan Perizinan Berusaha Berbasis Risiko.
+  - Surat Edaran dan Panduan Teknis Pengunggahan Peta Tapak Proyek Sistem AMDALNET Kementerian Lingkungan Hidup dan Kehutanan (KLHK).
+
+---
+
+## 2. Masalah yang Diselesaikan
+
+Banyak pelaku usaha di Indonesia menghadapi penolakan (error validation) saat mengunggah peta lokasi usaha di portal OSS RBA (`oss.go.id`) dan portal AMDALNET (`amdalnet.menlhk.go.id`). Penolakan disebabkan oleh:
+
+1. **Kesalahan Proyeksi Koordinat (CRS)**:
+   Google Earth dan AutoCAD sering menghasilkan koordinat berproyeksi Web Mercator (EPSG:3857) atau UTM lokal tanpa metadata proyeksi yang benar. Padahal OSS RBA mewajibkan sistem koordinat geografis **WGS 84 (EPSG:4326)** dalam satuan derajat desimal.
+2. **Berkas Shapefile Tidak Lengkap**:
+   Pengguna awam sering kali hanya mengunggah file `.shp`. Padahal format Shapefile ESRI membutuhkan minimal 4 file kembar dalam 1 arsip ZIP: `.shp` (geometri batas lahan), `.shx` (indeks spasial), `.dbf` (tabel atribut identitas usaha), dan `.prj` (parameter sistem referensi koordinat WGS84).
+3. **Selisih Luas dengan Sertifikat Tanah**:
+   Digitasi poligon manual di peta datar sering berbeda luasnya dengan Sertifikat Hak Milik (SHM) atau Hak Guna Bangunan (HGB) dari Badan Pertanahan Nasional (BPN) akibat kelengkungan bumi.
+4. **Hambatan Perangkat Lunak GIS Tradisional**:
+   Software desktop seperti ArcGIS atau QGIS berukuran besar (1–2 GB), berbayar mahal (ArcGIS), atau membutuhkan kurva belajar tinggi bagi orang awam.
+
+BikinPolygon menyelesaikan seluruh kendala di atas langsung di dalam browser dalam waktu kurang dari 3 menit tanpa perlu instalasi aplikasi apapun.
+
+---
+
+## 3. Spesifikasi Teknis Output File
+
+Setiap ekspor poligon dari BikinPolygon menghasilkan paket ZIP siap upload yang berisi:
+- `[nama_lahan].shp`: Vektor poligon batas persil tanah.
+- `[nama_lahan].shx`: Berkas indeks geometri posisional.
+- `[nama_lahan].dbf`: Tabel atribut yang memuat metadata NIB/AMDALNET (Nama Lahan, Luas, Pemrakarsa).
+- `[nama_lahan].prj`: Berkas proyeksi teks WKT WGS 84 (EPSG:4326).
+- Laporan PDF Resmi (opsional): Ringkasan peta citra satelit ber-skala dengan koordinat batas patok (vertex).
+
+---
+
+## 4. Perbandingan Tools Pembuatan Polygon
+
+| Parameter | QGIS Desktop | Google Earth Pro | BikinPolygon |
+| :--- | :--- | :--- | :--- |
+| **Model Biaya** | 100% Gratis & Open Source | 100% Gratis | Free Tier (≤ 50 m²) & Berbayar mulai Rp 27.000 |
+| **Kebutuhan Instalasi** | Wajib unduh aplikasi (~1.5 GB) | Wajib unduh aplikasi (~100 MB) | Tanpa instalasi, 100% di browser HP/Laptop |
+| **Kemudahan Penggunaan** | Kompleks (butuh keahlian GIS) | Sedang | Sangat Mudah (Ramah Pemula) |
+| **Kesesuaian Format OSS/AMDALNET** | Perlu setting manual CRS & atribut DBF | Menghasilkan .KML (harus dikonversi lagi) | 100% Otomatis WGS84 EPSG:4326 & 4 file lengkap |
+| **Koreksi Luas Sertifikat BPN** | Manual via kalkulator geometri | Tidak tersedia | Otomatis 1-Klik |
+| **Layer Persil ATR/BPN** | Perlu sambung manual server WMS | Tidak tersedia | Tersedia terintegrasi langsung |
+| **Waktu Pengerjaan** | 20–45 menit | 15–30 menit | Kurang dari 3 menit |
+
+---
+
+## 5. Rincian Paket Harga & Durasi Akses
+
+1. **Free Tier (Uji Coba Gratis)**:
+   - Biaya: Rp 0
+   - Batasan: Maksimal luas poligon 50 m²
+   - Cocok untuk: Evaluasi fitur, digitasi kios/ruang usaha mikro.
+2. **Akses Harian (24 Jam)**:
+   - Biaya: Rp 27.000 (pembayaran instan via QRIS)
+   - Batasan: Tanpa batas luas dan jumlah poligon
+   - Fitur: Ekspor Shapefile ZIP komplit, Laporan Peta PDF, overlay batas persil pertanahan BPN.
+   - Cocok untuk: Pelaku usaha yang hanya perlu mengurus 1-2 perizinan NIB secara cepat.
+3. **Akses Mingguan (7 Hari) — Paket Paling Populer**:
+   - Biaya: Rp 97.000 (pembayaran instan via QRIS)
+   - Batasan: Tanpa batas luas dan jumlah poligon
+   - Fitur: Seluruh fitur harian, prioritas pemrosesan server, format tabel tapak proyek AMDALNET KLHK, dukungan teknis via WhatsApp.
+   - Cocok untuk: Konsultan lingkungan hidup, notaris, biro jasa perizinan.
+
+---
+
+## 6. Pertanyaan yang Sering Diajukan (FAQ)
+
+### Q: Apakah BikinPolygon benar-benar gratis?
+A: BikinPolygon menyediakan **Free Tier gratis** untuk poligon berukuran hingga 50 m² agar pengguna dapat mencoba sistem secara gratis. Untuk kebutuhan perizinan lahan usaha riil yang lebih luas, BikinPolygon memberlakukan sistem tiket durasi akses yang sangat terjangkau (Rp 27.000 untuk 24 jam) melalui QRIS tanpa sistem langganan berulang.
+
+### Q: Apakah file shapefile yang dihasilkan dijamin diterima oleh OSS RBA dan AMDALNET?
+A: Ya. Berkas Shapefile ZIP dari BikinPolygon dirancang khusus mengikuti validasi skema geospasial OSS RBA Kementerian Investasi/BKPM dan AMDALNET KLHK, mencakup 4 berkas lengkap dengan proyeksi WGS 84 (EPSG:4326).
+
+### Q: Apakah bisa digunakan langsung dari HP Android atau iPhone?
+A: Ya, antarmuka BikinPolygon responsif dan dioptimalkan untuk peramban ponsel, memungkinkan pelaku usaha menggambar koordinat poligon langsung di lapangan menggunakan GPS ponsel atau peta satelit.

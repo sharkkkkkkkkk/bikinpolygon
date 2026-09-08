@@ -151,6 +151,79 @@ Pada tahap Tata Ruang (KKPR), Anda diwajibkan mengunggah file **Shapefile (.SHP)
 ### Langkah 4: Terbitnya NIB & Sertifikat Standar
 Setelah polygon tervalidasi otomatis oleh sistem tata ruang, NIB Anda akan diterbitkan secara instan!
 `
+    },
+    'cara-buat-polygon-oss-amdalnet-gratis-vs-instan-qgis-bikinpolygon': {
+        slug: 'cara-buat-polygon-oss-amdalnet-gratis-vs-instan-qgis-bikinpolygon',
+        title: "Cara Buat Polygon NIB OSS & AMDALNET: Perbandingan QGIS, Google Earth, dan BikinPolygon",
+        excerpt: "Panduan lengkap perbandingan membuat polygon koordinat Shapefile (.SHP) secara gratis dengan QGIS atau secara instan langsung dari browser tanpa instalasi software.",
+        author: "Tim Riset Geospasial BikinPolygon",
+        created_at: "2026-09-08T09:00:00Z",
+        content: `
+## Ringkasan Cepat: Memilih Metode Pembuatan Polygon OSS & AMDALNET
+
+Untuk membuat berkas polygon Shapefile (.SHP) NIB OSS RBA dan tapak proyek AMDALNET KLHK, terdapat dua pendekatan utama: metode software desktop 100% gratis seperti QGIS dan Google Earth Pro, atau metode generator berbasis web instan seperti BikinPolygon. Pilihan terbaik bergantung pada apakah Anda mengutamakan nol biaya dengan kurva belajar teknis, atau mengutamakan kecepatan pengerjaan tanpa perlu menginstal aplikasi berat.
+
+Berdasarkan **Peraturan BKPM No. 4 Tahun 2021** dan **Pedoman Teknis AMDALNET KLHK**, seluruh file peta yang diunggah wajib memenuhi spesifikasi sistem koordinat **WGS 84 (EPSG:4326)** serta terdiri dari 4 komponen berkas Shapefile: \`.shp\`, \`.shx\`, \`.dbf\`, dan \`.prj\`.
+
+---
+
+## Tabel Perbandingan Fitur & Efisiensi
+
+| Parameter Evaluasi | QGIS Desktop (Open Source) | Google Earth Pro | BikinPolygon GIS Workspace |
+| :--- | :--- | :--- | :--- |
+| **Biaya Lisensi** | 100% Gratis Selamanya | 100% Gratis | Free Tier (≤ 50 m²) & Tiket Akses mulai Rp 27.000 |
+| **Instalasi & Spesifikasi** | Wajib unduh aplikasi (~1.5 GB), butuh laptop/PC | Wajib unduh aplikasi (~100 MB), butuh PC | Tanpa instalasi, 100% di browser HP maupun Laptop |
+| **Waktu Pengerjaan** | 30–60 menit (manual layer & attribute) | 20–30 menit (butuh konversi KML ke SHP) | 2–3 menit instan |
+| **Format Standar WGS84** | Pengaturan manual CRS (EPSG:4326) | Otomatis EPSG:4326 | Otomatis terkalibrasi EPSG:4326 |
+| **Kelengkapan Berkas ZIP** | Harus diekspor & dikompres manual | Hanya menghasilkan KML/KMZ (bukan SHP) | Otomatis 1 ZIP berisi 4 file (.shp, .shx, .dbf, .prj) |
+| **Koreksi Luas Sertifikat BPN** | Manual melalui kalkulator geometri | Tidak tersedia | Otomatis menyesuaikan angka sertifikat BPN |
+| **Layer Persil Pertanahan ATR/BPN** | Perlu konfigurasi manual koneksi WMS | Tidak tersedia | Tersedia langsung di atas peta satelit |
+| **Dukungan Mobile (HP)** | Tidak bisa di HP | Tampilan terbatas | Responsif penuh di Android & iPhone |
+
+---
+
+## Opsi 1: Cara Membuat Polygon Secara Gratis Menggunakan QGIS
+
+Jika Anda memiliki laptop/PC dan ingin solusi yang 100% gratis tanpa biaya, Anda dapat menggunakan software open-source **QGIS**:
+
+1. **Unduh & Pasang QGIS**: Kunjungi situs resmi qgis.org dan unduh installer (sekitar 1.2 – 1.8 GB).
+2. **Atur Sistem Koordinat (CRS)**: Pastikan project CRS disetel ke **EPSG:4326 - WGS 84**.
+3. **Tambahkan Basemap Citra Satelit**: Pasang plugin *QuickMapServices* atau tambahkan koneksi Google Satellite XYZ Tiles.
+4. **Buat Layer Vektor Baru**: Pilih menu *Layer > Create Layer > New Shapefile Layer*. Tentukan Geometry Type sebagai **Polygon** dan CRS **EPSG:4326**.
+5. **Digitasi Batas Lahan**: Aktifkan *Toggle Editing*, lalu gunakan tool *Add Polygon Feature* untuk menitikkan batas-batas tanah Anda.
+6. **Ekspor & Buat Berkas ZIP**: Simpan layer, buka direktori folder tempat file tersimpan, pilih 4 file berekstensi \`.shp\`, \`.shx\`, \`.dbf\`, dan \`.prj\`, lalu klik kanan dan kompres menjadi satu file \`.zip\`.
+
+> **Catatan QGIS**: Pastikan tidak ada kesalahan geometri seperti *self-intersection* (garis bersilangan) karena sistem OSS RBA akan otomatis menolak berkas tersebut.
+
+---
+
+## Opsi 2: Cara Menggunakan Google Earth Pro (Membutuhkan Konverter)
+
+Google Earth Pro sering digunakan karena citra satelitnya yang familiar, namun memiliki keterbatasan mendasar:
+1. Google Earth hanya mengekspor file berformat **.KML** atau **.KMZ**, bukan Shapefile (.SHP).
+2. Portal OSS RBA dan AMDALNET KLHK **menolak berkas KML mentah**.
+3. Anda harus menggunakan konverter pihak ketiga atau software GIS tambahan untuk mengubah KML menjadi Shapefile berproyeksi WGS84 dengan file PRJ yang valid.
+
+---
+
+## Opsi 3: Cara Cepat & Instan Tanpa Software GIS Menggunakan BikinPolygon
+
+Jika Anda tidak memiliki waktu untuk mempelajari QGIS, sedang berada di lapangan menggunakan HP, atau butuh berkas yang 100% dijamin lolos validasi portal perizinan:
+
+1. **Buka Browser**: Kunjungi [bikinpolygon.xyz](https://www.bikinpolygon.xyz) di HP atau Laptop.
+2. **Cari Lokasi**: Masukkan alamat lahan atau titik koordinat GPS.
+3. **Gunakan Panduan Layer Persil**: Aktifkan fitur batas bidang tanah ATR/BPN untuk melihat patok resmi lahan.
+4. **Gambar Batas Lahan**: Cukup klik atau sentuh layar untuk menggambar bidang lahan secara presisi.
+5. **Koreksi Luas (Jika Ada Sertifikat)**: Masukkan luas meter persegi sesuai Sertifikat Tanah agar angka luas di tabel atribut sama persis 100% tanpa selisih.
+6. **Unduh Berkas ZIP**: Klik tombol ekspor untuk mendapatkan berkas Shapefile ZIP lengkap (.shp, .shx, .dbf, .prj) yang siap diunggah ke OSS RBA maupun AMDALNET.
+
+---
+
+## Kesimpulan: Mana yang Harus Anda Pilih?
+
+- **Pilih QGIS jika**: Anda memiliki latar belakang pemetaan GIS, memiliki komputer dengan spesifikasi memadai, dan membutuhkan solusi 100% gratis tanpa batas waktu.
+- **Pilih BikinPolygon jika**: Anda adalah pelaku usaha, konsultan legal, atau notaris yang ingin menyelesaikan perizinan dalam 3 menit, tidak ingin dipusingkan dengan software GIS berat, dan ingin kepastian file bebas error validasi OSS RBA & AMDALNET.
+`
     }
 };
 
