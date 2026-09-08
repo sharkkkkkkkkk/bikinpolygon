@@ -39,3 +39,4 @@ server/uploads/
 
 # Database files
 *.sql
+!server/migrations/*.sql

@@ -195,11 +195,18 @@ export function AmdalnetExportPanel({ existingPolygonGeoJSON, onRequireAuth, isO
 
     try {
       setLoading(true);
-      if (user) {
+      if (user && !isFreeTier && user.role !== 'admin') {
         try {
           await api.post('/generator/authorize-export', { exportType: isAmdalMode ? 'AMDALNET_SHP' : 'OSS_SHP', customPoints: pts, area: numericArea });
-        } catch (e) {
-          console.warn("Authorize export backend check skipped:", e);
+        } catch (authErr) {
+          const errMsg = authErr.response?.data?.details || authErr.response?.data?.error || authErr.message;
+          toast({
+            title: "Otorisasi Ekspor Ditolak 🔒",
+            description: errMsg || "Masa akses Anda telah habis. Silakan beli Paket Akses untuk mengunduh.",
+            variant: "destructive"
+          });
+          setPakasirModalOpen(true);
+          return;
         }
       }
 
@@ -262,11 +269,18 @@ export function AmdalnetExportPanel({ existingPolygonGeoJSON, onRequireAuth, isO
 
     try {
       setLoading(true);
-      if (user) {
+      if (user && !isFreeTier && user.role !== 'admin') {
         try {
           await api.post('/generator/authorize-export', { exportType: isAmdalMode ? 'AMDALNET_PDF' : 'OSS_PDF', customPoints: pts, area: numericArea });
-        } catch (e) {
-          console.warn("Authorize export backend check skipped:", e);
+        } catch (authErr) {
+          const errMsg = authErr.response?.data?.details || authErr.response?.data?.error || authErr.message;
+          toast({
+            title: "Otorisasi Ekspor Ditolak 🔒",
+            description: errMsg || "Masa akses Anda telah habis. Silakan beli Paket Akses untuk mengunduh.",
+            variant: "destructive"
+          });
+          setPakasirModalOpen(true);
+          return;
         }
       }
 

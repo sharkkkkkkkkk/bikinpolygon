@@ -5,68 +5,34 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const { getJwtSecret } = require('../middleware/authMiddleware');
 
+// In-memory caching maps backed by Supabase tables: payment_orders & device_access
+const orders = new Map();
+const deviceAccess = new Map();
+
+// Optional one-time migration from legacy JSON files if they exist on disk
 const DATA_DIR = path.join(__dirname, '../data');
 const ACCESS_FILE = path.join(DATA_DIR, 'deviceAccess.json');
 const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 
-if (!fs.existsSync(DATA_DIR)) {
-    try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
-}
-
-function loadDeviceAccess() {
-    try {
-        if (fs.existsSync(ACCESS_FILE)) {
-            const data = JSON.parse(fs.readFileSync(ACCESS_FILE, 'utf8'));
-            return new Map(Object.entries(data));
+try {
+    if (fs.existsSync(ACCESS_FILE)) {
+        const legacyAccess = JSON.parse(fs.readFileSync(ACCESS_FILE, 'utf8'));
+        for (const [k, v] of Object.entries(legacyAccess)) {
+            deviceAccess.set(k, Number(v));
         }
-    } catch (e) {
-        console.warn("Failed to load deviceAccess.json:", e);
     }
-    return new Map();
-}
-
-function saveDeviceAccess(map) {
-    try {
-        const obj = {};
-        for (const [k, v] of map.entries()) {
-            obj[k] = v;
+    if (fs.existsSync(ORDERS_FILE)) {
+        const legacyOrders = JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8'));
+        for (const [k, v] of Object.entries(legacyOrders)) {
+            orders.set(k, v);
         }
-        fs.writeFileSync(ACCESS_FILE, JSON.stringify(obj, null, 2), 'utf8');
-    } catch (e) {
-        console.warn("Failed to save deviceAccess.json:", e);
     }
+} catch (e) {
+    console.warn('[Payment Store] Legacy JSON migration check warning:', e.message);
 }
-
-function loadOrders() {
-    try {
-        if (fs.existsSync(ORDERS_FILE)) {
-            const data = JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8'));
-            return new Map(Object.entries(data));
-        }
-    } catch (e) {
-        console.warn("Failed to load orders.json:", e);
-    }
-    return new Map();
-}
-
-function saveOrders(map) {
-    try {
-        const obj = {};
-        for (const [k, v] of map.entries()) {
-            obj[k] = v;
-        }
-        fs.writeFileSync(ORDERS_FILE, JSON.stringify(obj, null, 2), 'utf8');
-    } catch (e) {
-        console.warn("Failed to save orders.json:", e);
-    }
-}
-
-// In-memory store backed by JSON files
-const orders = loadOrders();
-const deviceAccess = loadDeviceAccess();
 
 const PAKASIR_SLUG = process.env.PAKASIR_SLUG || 'bikinpolygon';
-const PAKASIR_API_KEY = process.env.PAKASIR_API_KEY || 'bSrdqpCoBg6KeZZdCtTiDsQZM0vghZJn';
+const PAKASIR_API_KEY = process.env.PAKASIR_API_KEY;
 
 // Pricing duration mapping (in days)
 const PRICING_PLANS = {
@@ -74,6 +40,103 @@ const PRICING_PLANS = {
     '97000': { days: 7, name: 'Akses Mingguan (7 Hari)', ms: 7 * 24 * 60 * 60 * 1000 },
     '247000': { days: 28, name: 'Akses Bulanan (28 Hari)', ms: 28 * 24 * 60 * 60 * 1000 }
 };
+
+// --- Database persistence helpers for Supabase ---
+async function saveOrderToDB(supabase, orderData) {
+    orders.set(orderData.orderId, orderData);
+    if (!supabase) return;
+    try {
+        await supabase.from('payment_orders').upsert({
+            id: orderData.orderId,
+            amount: Number(orderData.amount),
+            total_payment: Number(orderData.totalPayment || orderData.amount),
+            fee: Number(orderData.fee || 0),
+            payment_number: orderData.paymentNumber || null,
+            expired_at: orderData.expiredAt || null,
+            device_id: orderData.deviceId || null,
+            user_id: orderData.userId || null,
+            email: orderData.email ? orderData.email.toLowerCase() : null,
+            plan_name: orderData.planName || null,
+            days: Number(orderData.days || 1),
+            status: orderData.status || 'pending',
+            updated_at: new Date().toISOString()
+        });
+    } catch (err) {
+        // Non-blocking error if table is not yet migrated in Supabase
+        console.warn('[Payment Orders DB Save Warning]', err.message);
+    }
+}
+
+async function getOrderFromDB(supabase, orderId) {
+    if (!orderId) return null;
+    let order = orders.get(orderId);
+    if (order) return order;
+
+    if (supabase) {
+        try {
+            const { data } = await supabase.from('payment_orders').select('*').eq('id', orderId).maybeSingle();
+            if (data) {
+                order = {
+                    orderId: data.id,
+                    amount: Number(data.amount),
+                    totalPayment: Number(data.total_payment || data.amount),
+                    fee: Number(data.fee || 0),
+                    paymentNumber: data.payment_number,
+                    expiredAt: data.expired_at,
+                    deviceId: data.device_id,
+                    userId: data.user_id,
+                    email: data.email,
+                    planName: data.plan_name,
+                    days: data.days,
+                    status: data.status,
+                    createdAt: data.created_at
+                };
+                orders.set(orderId, order);
+                return order;
+            }
+        } catch (err) {
+            console.warn('[Payment Orders DB Read Warning]', err.message);
+        }
+    }
+    return null;
+}
+
+async function saveDeviceAccessToDB(supabase, deviceId, expiryTimestamp, orderId = null) {
+    if (!deviceId || deviceId === 'unknown') return;
+    deviceAccess.set(deviceId, Number(expiryTimestamp));
+    if (!supabase) return;
+    try {
+        await supabase.from('device_access').upsert({
+            device_id: deviceId,
+            access_expiry: Number(expiryTimestamp),
+            expires_at: new Date(Number(expiryTimestamp)).toISOString(),
+            last_order_id: orderId || null,
+            updated_at: new Date().toISOString()
+        });
+    } catch (err) {
+        console.warn('[Device Access DB Save Warning]', err.message);
+    }
+}
+
+async function getDeviceAccessFromDB(supabase, deviceId) {
+    if (!deviceId || deviceId === 'unknown') return 0;
+    let exp = Number(deviceAccess.get(deviceId) || 0);
+    if (exp > Date.now()) return exp;
+
+    if (supabase) {
+        try {
+            const { data } = await supabase.from('device_access').select('access_expiry').eq('device_id', deviceId).maybeSingle();
+            if (data?.access_expiry) {
+                exp = Number(data.access_expiry);
+                deviceAccess.set(deviceId, exp);
+                return exp;
+            }
+        } catch (err) {
+            console.warn('[Device Access DB Read Warning]', err.message);
+        }
+    }
+    return exp;
+}
 
 // Helper function to grant duration access pass to database user automatically
 async function grantUserDurationAccessInDB(supabase, userId, userEmail, days) {
@@ -116,6 +179,52 @@ async function grantUserDurationAccessInDB(supabase, userId, userEmail, days) {
     }
 }
 
+// Helper: Query Pakasir API to check order status
+async function verifyPakasirOrder(supabase, orderId, amount, deviceId, currentUserId = null, currentUserEmail = null) {
+    if (!PAKASIR_API_KEY || !orderId) return false;
+
+    const amountsToTry = amount ? [String(amount)] : ['27000', '97000', '247000'];
+    
+    for (const amt of amountsToTry) {
+        try {
+            const url = `https://app.pakasir.com/api/transactiondetail?project=${PAKASIR_SLUG}&amount=${amt}&order_id=${orderId}&api_key=${PAKASIR_API_KEY}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data?.transaction?.status === 'completed') {
+                const planAmt = data.transaction.amount || amt;
+                const plan = PRICING_PLANS[String(planAmt)] || { days: 1 };
+                const days = plan.days;
+                const targetDevice = deviceId || data.transaction.device_id || 'unknown';
+
+                let order = await getOrderFromDB(supabase, orderId) || { orderId, amount: Number(planAmt), status: 'completed' };
+                order.status = 'completed';
+                if (currentUserId) order.userId = currentUserId;
+                if (currentUserEmail) order.email = currentUserEmail;
+                await saveOrderToDB(supabase, order);
+
+                // Update User Account in Supabase DB automatically
+                const userIdToCredit = order.userId || currentUserId;
+                const emailToCredit = order.email || currentUserEmail;
+                if (supabase && (userIdToCredit || emailToCredit)) {
+                    await grantUserDurationAccessInDB(supabase, userIdToCredit, emailToCredit, days);
+                }
+
+                if (targetDevice !== 'unknown') {
+                    const currentExp = await getDeviceAccessFromDB(supabase, targetDevice);
+                    const newExp = Math.max(currentExp, Date.now()) + (days * 24 * 60 * 60 * 1000);
+                    await saveDeviceAccessToDB(supabase, targetDevice, newExp, orderId);
+                    console.log(`[Pakasir Verified] Device: ${targetDevice}, Order: ${orderId}, Expiry: ${new Date(newExp).toISOString()}`);
+                }
+                return true;
+            }
+        } catch (e) {
+            console.error('[Pakasir Status Check Error]', e);
+        }
+    }
+    return false;
+}
+
 // 1. Create Payment Order via Pakasir API (Custom QRIS)
 router.post('/create-order', async (req, res) => {
     const { amount, deviceId, redirectUrl, userId, email } = req.body;
@@ -154,33 +263,35 @@ router.post('/create-order', async (req, res) => {
     let expiredAt = null;
     let qrImageUrl = null;
 
-    // Call Pakasir API Transaction Create (QRIS Method - Section C.2)
-    try {
-        const createRes = await fetch('https://app.pakasir.com/api/transactioncreate/qris', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                project: PAKASIR_SLUG,
-                order_id: orderId,
-                amount: Number(amount),
-                api_key: PAKASIR_API_KEY
-            })
-        });
+    // Call Pakasir API Transaction Create (QRIS Method)
+    if (PAKASIR_API_KEY) {
+        try {
+            const createRes = await fetch('https://app.pakasir.com/api/transactioncreate/qris', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    project: PAKASIR_SLUG,
+                    order_id: orderId,
+                    amount: Number(amount),
+                    api_key: PAKASIR_API_KEY
+                })
+            });
 
-        const pakData = await createRes.json();
-        console.log(`[Pakasir API transactioncreate Response]`, pakData);
+            const pakData = await createRes.json();
+            console.log(`[Pakasir API transactioncreate Response]`, pakData);
 
-        if (pakData?.payment?.payment_number) {
-            paymentNumber = pakData.payment.payment_number;
-            totalPayment = pakData.payment.total_payment || Number(amount);
-            fee = pakData.payment.fee || 0;
-            expiredAt = pakData.payment.expired_at || null;
-            qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(paymentNumber)}`;
+            if (pakData?.payment?.payment_number) {
+                paymentNumber = pakData.payment.payment_number;
+                totalPayment = pakData.payment.total_payment || Number(amount);
+                fee = pakData.payment.fee || 0;
+                expiredAt = pakData.payment.expired_at || null;
+                qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(paymentNumber)}`;
+            }
+        } catch (apiErr) {
+            console.error('[Pakasir Transaction Create API Error]', apiErr);
         }
-    } catch (apiErr) {
-        console.error('[Pakasir Transaction Create API Error]', apiErr);
     }
 
     if (!qrImageUrl) {
@@ -203,8 +314,7 @@ router.post('/create-order', async (req, res) => {
         createdAt: new Date().toISOString()
     };
 
-    orders.set(orderId, orderData);
-    saveOrders(orders);
+    await saveOrderToDB(req.supabase, orderData);
 
     res.json({
         success: true,
@@ -221,55 +331,7 @@ router.post('/create-order', async (req, res) => {
     });
 });
 
-// Helper: Query Pakasir API to check order status
-async function verifyPakasirOrder(supabase, orderId, amount, deviceId, currentUserId = null, currentUserEmail = null) {
-    if (!PAKASIR_API_KEY || !orderId) return false;
-
-    const amountsToTry = amount ? [String(amount)] : ['27000', '97000', '247000'];
-    
-    for (const amt of amountsToTry) {
-        try {
-            const url = `https://app.pakasir.com/api/transactiondetail?project=${PAKASIR_SLUG}&amount=${amt}&order_id=${orderId}&api_key=${PAKASIR_API_KEY}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data?.transaction?.status === 'completed') {
-                const planAmt = data.transaction.amount || amt;
-                const plan = PRICING_PLANS[String(planAmt)] || { days: 1 };
-                const days = plan.days;
-                const targetDevice = deviceId || data.transaction.device_id || 'unknown';
-
-                let order = orders.get(orderId) || { orderId, amount: Number(planAmt), status: 'completed' };
-                order.status = 'completed';
-                if (currentUserId) order.userId = currentUserId;
-                if (currentUserEmail) order.email = currentUserEmail;
-                orders.set(orderId, order);
-                saveOrders(orders);
-
-                // Update User Account in Supabase DB automatically
-                const userIdToCredit = order.userId || currentUserId;
-                const emailToCredit = order.email || currentUserEmail;
-                if (supabase && (userIdToCredit || emailToCredit)) {
-                    await grantUserDurationAccessInDB(supabase, userIdToCredit, emailToCredit, days);
-                }
-
-                if (targetDevice !== 'unknown') {
-                    const currentExp = Number(deviceAccess.get(targetDevice) || Date.now());
-                    const newExp = Math.max(currentExp, Date.now()) + (days * 24 * 60 * 60 * 1000);
-                    deviceAccess.set(targetDevice, newExp);
-                    saveDeviceAccess(deviceAccess);
-                    console.log(`[Pakasir Verified] Device: ${targetDevice}, Order: ${orderId}, Expiry: ${new Date(newExp).toISOString()}`);
-                }
-                return true;
-            }
-        } catch (e) {
-            console.error('[Pakasir Status Check Error]', e);
-        }
-    }
-    return false;
-}
-
-// 2. Check Order / Device Access Status
+// 2. Check Order / Device Access Status & Synchronize with User Account
 router.get('/check-status', async (req, res) => {
     const { order_id, device_id, amount } = req.query;
 
@@ -288,16 +350,52 @@ router.get('/check-status', async (req, res) => {
         } catch (e) {}
     }
 
-    let deviceExpiry = Number(deviceAccess.get(device_id) || 0);
+    let deviceExpiry = await getDeviceAccessFromDB(req.supabase, device_id);
     let isActive = deviceExpiry > Date.now();
 
+    // Check user account access_until in Supabase DB if user is authenticated
+    if (req.supabase && (targetUserId || targetEmail)) {
+        try {
+            let query = req.supabase.from('bikinpolygon_users').select('id, role, access_until');
+            if (targetUserId) {
+                query = query.eq('id', targetUserId);
+            } else if (targetEmail) {
+                query = query.eq('email', targetEmail.toLowerCase());
+            }
+
+            const { data: dbUser } = await query.maybeSingle();
+            if (dbUser) {
+                if (dbUser.role === 'admin') {
+                    isActive = true;
+                    deviceExpiry = Math.max(deviceExpiry, Date.now() + 365 * 24 * 60 * 60 * 1000);
+                } else if (dbUser.access_until) {
+                    const userExp = new Date(dbUser.access_until).getTime();
+                    if (userExp > Date.now()) {
+                        isActive = true;
+                        deviceExpiry = Math.max(deviceExpiry, userExp);
+                        // Synchronize this active duration to current device
+                        if (device_id && device_id !== 'unknown') {
+                            await saveDeviceAccessToDB(req.supabase, device_id, deviceExpiry);
+                        }
+                    }
+                }
+            }
+        } catch (userCheckErr) {
+            console.warn('[Check Status User DB Lookup Warning]', userCheckErr.message);
+        }
+    }
+
     // Check specific order status
-    let orderObj = order_id ? orders.get(order_id) : null;
+    let orderObj = order_id ? await getOrderFromDB(req.supabase, order_id) : null;
 
     // Only attempt Pakasir verification if order_id is present and not yet completed
     if (order_id && (!orderObj || orderObj.status !== 'completed')) {
         const isVerified = await verifyPakasirOrder(req.supabase, order_id, amount, device_id, targetUserId, targetEmail);
-        orderObj = orders.get(order_id) || orderObj;
+        orderObj = await getOrderFromDB(req.supabase, order_id) || orderObj;
+        if (isVerified) {
+            deviceExpiry = await getDeviceAccessFromDB(req.supabase, device_id);
+            isActive = deviceExpiry > Date.now();
+        }
     }
 
     const isOrderCompleted = orderObj ? orderObj.status === 'completed' : false;
@@ -373,7 +471,7 @@ const handleWebhookRequest = async (req, res) => {
     console.log(`[Pakasir Webhook Received] Order: ${order_id}, Status: ${status}, Amount: ${amount}`);
 
     if (status === 'completed' && order_id) {
-        let order = orders.get(order_id);
+        let order = await getOrderFromDB(req.supabase, order_id);
         const plan = PRICING_PLANS[String(amount)];
         const days = plan ? plan.days : (amount >= 247000 ? 28 : (amount >= 97000 ? 7 : 1));
         const deviceId = order ? order.deviceId : (req.body.deviceId || 'unknown');
@@ -382,21 +480,29 @@ const handleWebhookRequest = async (req, res) => {
 
         if (order) {
             order.status = 'completed';
-            orders.set(order_id, order);
-            saveOrders(orders);
+        } else {
+            order = {
+                orderId: order_id,
+                amount: Number(amount),
+                deviceId,
+                userId: targetUserId,
+                email: targetEmail,
+                days,
+                status: 'completed'
+            };
         }
+        await saveOrderToDB(req.supabase, order);
 
-        // 1. Grant Access in SQLite / Supabase Database for User Account
+        // 1. Grant Access in Supabase Database for User Account
         if (req.supabase && (targetUserId || targetEmail)) {
             await grantUserDurationAccessInDB(req.supabase, targetUserId, targetEmail, days);
         }
 
-        // 2. Grant Device-level Access Pass
+        // 2. Grant Device-level Access Pass in Supabase
         if (deviceId !== 'unknown') {
-            const currentExp = Number(deviceAccess.get(deviceId) || Date.now());
+            const currentExp = await getDeviceAccessFromDB(req.supabase, deviceId);
             const newExp = Math.max(currentExp, Date.now()) + (days * 24 * 60 * 60 * 1000);
-            deviceAccess.set(deviceId, newExp);
-            saveDeviceAccess(deviceAccess);
+            await saveDeviceAccessToDB(req.supabase, deviceId, newExp, order_id);
             console.log(`[Pakasir Webhook Success] Device: ${deviceId}, Duration: ${days} Days, Active Until: ${new Date(newExp).toISOString()}`);
         }
     }
