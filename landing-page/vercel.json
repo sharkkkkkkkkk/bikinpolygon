@@ -23,6 +23,19 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "bikinpolygon.xyz"
+        }
+      ],
+      "destination": "https://www.bikinpolygon.xyz/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/robots.txt", "destination": "/robots.txt" },

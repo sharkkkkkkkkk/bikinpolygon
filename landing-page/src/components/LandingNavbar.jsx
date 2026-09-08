@@ -26,6 +26,9 @@ export default function LandingNavbar() {
                     <Link to="/" className="px-4 py-2 rounded-full hover:text-white hover:bg-white/5 transition-all">
                         Beranda
                     </Link>
+                    <Link to="/harga" className="px-4 py-2 rounded-full hover:text-white hover:bg-white/5 transition-all">
+                        Harga & Paket
+                    </Link>
                     <a href="#specifications" className="px-4 py-2 rounded-full hover:text-white hover:bg-white/5 transition-all">
                         Spesifikasi Teknis
                     </a>
@@ -63,6 +66,9 @@ export default function LandingNavbar() {
                 <div className="md:hidden mt-2 max-w-6xl mx-auto bg-[#0F172A]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 text-white pointer-events-auto animate-in fade-in slide-in-from-top-2 duration-200">
                     <Link to="/" onClick={() => setIsMenuOpen(false)} className="font-bold text-base border-b border-white/10 pb-3 hover:text-[#ADFA1D]">
                         Beranda
+                    </Link>
+                    <Link to="/harga" onClick={() => setIsMenuOpen(false)} className="font-bold text-base border-b border-white/10 pb-3 hover:text-[#ADFA1D]">
+                        Harga & Paket
                     </Link>
                     <a href="#specifications" onClick={() => setIsMenuOpen(false)} className="font-bold text-base border-b border-white/10 pb-3 hover:text-[#ADFA1D]">
                         Spesifikasi Teknis

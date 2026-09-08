@@ -63,9 +63,22 @@ export default function LandingPage() {
         fetchPosts();
     }, []);
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const q = params.get('q') || params.get('search');
+        if (q) {
+            window.location.href = `${APP_URL}/dashboard?search=${encodeURIComponent(q.trim())}`;
+        }
+    }, []);
+
     const handleQuickSearch = (e) => {
         e.preventDefault();
-        window.location.href = `${APP_URL}/dashboard`;
+        const trimmed = quickQuery.trim();
+        if (trimmed) {
+            window.location.href = `${APP_URL}/dashboard?search=${encodeURIComponent(trimmed)}`;
+        } else {
+            window.location.href = `${APP_URL}/dashboard`;
+        }
     };
 
     const faqs = [

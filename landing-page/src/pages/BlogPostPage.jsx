@@ -10,6 +10,7 @@ import SEOHead from '../seo/SEOHead';
 
 const fallbackArticles = {
     'kenapa-upload-polygon-oss-gagal-dan-solusinya': {
+        slug: 'kenapa-upload-polygon-oss-gagal-dan-solusinya',
         title: "Kenapa Upload Polygon OSS Gagal? 5 Penyebab & Solusinya",
         excerpt: "Panduan mengatasi gagal upload peta polygon KKPR di sistem OSS RBA BKPM, dari validasi CRS WGS84 hingga koreksi luas otomatis.",
         author: "Spesialis GIS BikinPolygon",
@@ -64,6 +65,7 @@ Tidak perlu lagi pusing menginstal QGIS atau mengonversi KML manual. Buka [Bikin
 `
     },
     'cara-membuat-polygon-oss-di-hp': {
+        slug: 'cara-membuat-polygon-oss-di-hp',
         title: "Cara Membuat Polygon OSS di HP Android & iPhone",
         excerpt: "Panduan praktis menggambar polygon lahan NIB OSS RBA langsung dari smartphone Android atau iPhone Anda tanpa software GIS.",
         author: "Tim GIS BikinPolygon",
@@ -87,6 +89,7 @@ Membuat berkas **Shapefile (.SHP)** untuk perizinan **NIB OSS RBA** kini tidak l
 `
     },
     'cara-membuat-polygon-nib-dan-amdalnet-tanpa-gis': {
+        slug: 'cara-membuat-polygon-nib-dan-amdalnet-tanpa-gis',
         title: "Cara Membuat Polygon NIB & AMDALNET Tanpa Software GIS",
         excerpt: "Trik mudah membuat berkas Shapefile tanpa perlu menginstal aplikasi berat seperti ArcGIS atau QGIS.",
         author: "Tim GIS BikinPolygon",
@@ -105,6 +108,7 @@ Dengan fitur ini, proses pengurusan **Tapak Proyek AMDALNET** maupun **Peta Loka
 `
     },
     'apa-itu-peta-polygon-oss-rba-dan-tapak-proyek-amdalnet': {
+        slug: 'apa-itu-peta-polygon-oss-rba-dan-tapak-proyek-amdalnet',
         title: "Apa Itu Peta Polygon OSS RBA & Tapak Proyek AMDALNET?",
         excerpt: "Penjelasan mendalam mengenai fungsi data geospasial dalam proses Perizinan Berusaha Berbasis Risiko.",
         author: "Spesialis Geospasial",
@@ -123,6 +127,7 @@ Gunakan **BikinPolygon** untuk memastikan seluruh parameter teknis geospasial An
 `
     },
     'cara-mendapatkan-nib-pelaku-usaha-di-oss-rba': {
+        slug: 'cara-mendapatkan-nib-pelaku-usaha-di-oss-rba',
         title: "Cara Mendapatkan NIB Pelaku Usaha di OSS RBA",
         excerpt: "Langkah demi langkah mengurus Nomor Induk Berusaha (NIB) lengkap hingga tahap upload lokasi lahan.",
         author: "Konsultan Legal Perizinan",
@@ -198,6 +203,8 @@ export default function BlogPostPage() {
         );
     }
 
+    const articleSlug = post.slug || slug;
+
     const articleSchema = post ? {
         "@context": "https://schema.org",
         "@type": "Article",
@@ -216,7 +223,7 @@ export default function BlogPostPage() {
             }
         },
         "datePublished": post.created_at,
-        "mainEntityOfPage": `https://www.bikinpolygon.xyz/blog/${post.slug}`
+        "mainEntityOfPage": `https://www.bikinpolygon.xyz/blog/${articleSlug}`
     } : null;
 
     return (
@@ -224,7 +231,7 @@ export default function BlogPostPage() {
             <SEOHead 
                 title={`${post.title} | BikinPolygon Blog`} 
                 description={post.excerpt || post.title} 
-                canonicalUrl={`https://www.bikinpolygon.xyz/blog/${post.slug}`}
+                canonicalUrl={`https://www.bikinpolygon.xyz/blog/${articleSlug}`}
                 type="article"
                 schemaData={articleSchema}
             />

@@ -62,10 +62,10 @@ export default function LandingFooter() {
                             Fitur & Solusi
                         </h3>
                         <ul className="space-y-2.5 text-xs text-slate-400 font-medium">
-                            <li><Link to="/" className="hover:text-[#ADFA1D] transition-colors">Polygon NIB OSS RBA</Link></li>
-                            <li><Link to="/" className="hover:text-[#ADFA1D] transition-colors">AMDALNET Export Suite</Link></li>
-                            <li><Link to="/" className="hover:text-[#ADFA1D] transition-colors">Overlay Persil BPN (WMS)</Link></li>
-                            <li><Link to="/harga" className="hover:text-[#ADFA1D] transition-colors">1x Free & Paket Akses</Link></li>
+                            <li><Link to="/blog/apa-itu-peta-polygon-oss-rba-dan-tapak-proyek-amdalnet" className="hover:text-[#ADFA1D] transition-colors">Panduan Polygon NIB OSS RBA</Link></li>
+                            <li><Link to="/blog/cara-membuat-polygon-nib-dan-amdalnet-tanpa-gis" className="hover:text-[#ADFA1D] transition-colors">AMDALNET Export Suite</Link></li>
+                            <li><Link to="/blog/kenapa-upload-polygon-oss-gagal-dan-solusinya" className="hover:text-[#ADFA1D] transition-colors">Solusi Gagal Upload OSS</Link></li>
+                            <li><Link to="/harga" className="hover:text-[#ADFA1D] transition-colors">Free Tier & Paket Akses</Link></li>
                         </ul>
                     </div>
 
